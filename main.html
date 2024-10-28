@@ -222,10 +222,13 @@
         // OD间统计：od_sc + od_dc
         const odDistribute = od_scDistribute.map((i,index) => (i + od_dcDistribute[index]));
         // VD房：这个房间相对比较少，所以不区分双/单床
-        // VD和隔夜房两个，为了公平，采取一个多到少，一个少到多。
-        const vdDistribute = distributeIntegers(formValues.vd, formValues.num);
+        // VD和gy排序要根据前面的来动态调整，达到总数接近
+        let sortUp = odDistribute[odDistribute.length - 1] - odDistribute[0] > 0
+        const vdDistribute = distributeIntegers(formValues.vd, formValues.num,!sortUp);
         // 隔夜分配
-        const gyDistribute = distributeIntegers(formValues.gy, formValues.num,true);
+        let beforeArr = odDistribute.map((i,index) => (i + vdDistribute[index]));
+        sortUp = beforeArr[beforeArr.length - 1] - beforeArr[0] > 0
+        const gyDistribute = distributeIntegers(formValues.gy, formValues.num,!sortUp);
         // 显示结果
         disPlayDistributeResult({
             vdDistribute,
