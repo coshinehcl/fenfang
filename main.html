@@ -5,26 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>分房系统</title>
     <style>
+        body,html {
+            font-size: 15px;
+            margin:0;
+            padding: 0;;
+        }
+        .form {
+            padding:20px;
+            width: 100vw;
+            box-sizing: border-box;
+        }
         .form .item,.form .item-btn {
             display: flex;
+            width: 100%;
             margin-bottom: 10px;
+            align-items: center;
             justify-content: center;
         }
         .form .item label {
             width: 80px;
         }
+        .form .item input {
+            flex:1;
+            height: 26px;
+            outline: none;
+            border-radius: 10000px;
+            border:1px solid #333;
+            padding: 0 10px;
+        }
+        .form .item input:focus {
+            border-color: blue;
+        }
         .form .item-btn button {
-            width: 100px;
+            height: 26px;
+            border-radius: 10000px;
+            border:1px solid #333;
+            width: 200px;
         }
         .form-result {
+            width: 100vw;
+            box-sizing: border-box;
             display: flex;
+            flex-wrap:wrap;
             margin-bottom: 10px;
-            justify-content: center;
-            flex-direction: column;
+            justify-content: space-around;
             align-items: center;
         }
-        .result-item > div {
-            margin: 4px 0;
+        .form-result .result-item {
+            width: calc(50% - 10px);
+            box-sizing: border-box;
+            border:1px solid #dfe1e5;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .form-result .result-item .result-item-header {
+            display: flex;
+            justify-content: space-between;
+            padding:4px;
+            border-bottom: 1px solid #dfe1e5;
+        }
+        .form-result .distribute_total {
+            color:#FF0033;
+        }
+        .bold {
+            font-weight: bold;
+            font-size: 1.1;
+        }
+        .info {
+            color: #999;
+        }
+        .content-item {
+            display: flex;
+            justify-content: space-between;
+            padding:2px 4px;
+            color:var(--color);
         }
     </style>
 </head>
@@ -32,19 +87,23 @@
     <div class="form">
         <div class="item">
             <label for="od">OD房</label>
-            <input id="od" type="number">
+            <input id="od" type="number" placeholder="0">
         </div>
         <div class="item">
-            <label for="sc">双床房</label>
-            <input id="sc" type="number">
+            <label for="od_sc">OD双床房</label>
+            <input id="od_sc" type="number" placeholder="0">
+        </div>
+        <div class="item">
+            <label for="vd">VD房</label>
+            <input id="vd" type="number" placeholder="0">
         </div>
         <div class="item">
             <label for="gy">隔夜房</label>
-            <input id="gy" type="number">
+            <input id="gy" type="number" placeholder="0">
         </div>
         <div class="item">
             <label for="num">上班人数</label>
-            <input id="num" type="number">
+            <input id="num" type="number" placeholder="0">
         </div>
         <div class="item-btn">
             <button>分配</button>
@@ -54,11 +113,11 @@
 </body>
 <script>
     function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]]; // ES6 的数组解构赋值，方便交换元素
-    }
-    return array;
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]]; // ES6 的数组解构赋值，方便交换元素
+        }
+        return array;
     }
     function distributeIntegers(totalItems, numPeople,reverse = false) {
         const base = Math.floor(totalItems / numPeople);
@@ -74,6 +133,38 @@
     }
     const btn = document.querySelector('.form button');
     const items = document.querySelectorAll('.form .item');
+    function disPlayDistributeResult(config,menberNum) {
+        const { vdDistribute,odDistribute,od_scDistribute,od_dcDistribute,gyDistribute } = config || {};
+        // 移除老结果数据
+        const formResult = document.querySelector('.form-result');
+        while(formResult.firstChild) {
+            formResult.removeChild(formResult.firstChild);
+        }
+        // 显示新结果数据
+        const memberArr = new Array(menberNum).fill('').map((_,index) => index);// [0,1,2,..]
+        const randomMenber = shuffleArray(memberArr); // [2,3,1,..]
+        randomMenber.forEach((menberId,index) => {
+            const nemberResult = document.createElement('div');
+            const total = odDistribute[menberId] + vdDistribute[menberId] + gyDistribute[menberId];
+            const resultHeader = [
+                `<div class="info">人员${index + 1}</div>`,
+                `<div class="info">房间总数&nbsp;<span class="distribute_total bold">${total}</span></div>`,
+            ].join('');
+            const resultContent = [
+                // `<div class="content-item" style="--color:#9966FF"><span>OD房</span><span>${odDistribute[menberId]}</span></div>`,
+                `<div class="content-item" style="--color:#9900FF"><span>OD双床房</span><span class="bold">${od_scDistribute[menberId]}</span></div>`,
+                `<div class="content-item" style="--color:#660099"><span>OD单床房</span><span class="bold">${od_dcDistribute[menberId]}</span></div>`,
+                `<div class="content-item" style="--color:#3366FF"><span>VD房</span><span class="bold">${vdDistribute[menberId]}</span></div>`,
+                `<div class="content-item" style="--color:#000000"><span>隔夜房</span><span class="bold">${gyDistribute[menberId]}</span></div>`,
+            ].join('')
+            nemberResult.innerHTML = [
+                `<div class="result-item-header">${resultHeader}</div>`,
+                `<div class="result-item-content">${resultContent}</div>`,
+            ].join('');
+            nemberResult.className = 'result-item'
+            formResult.appendChild(nemberResult)
+        })
+    }
     btn.addEventListener('click',()=> {
         const formValues = {};
         Array.from(items).forEach(_item => {
@@ -81,37 +172,28 @@
             formValues[input.id] = Number(input.value || 0);
         })
         if(!formValues.od || !formValues.num) {
-            alert('先输入')
+            alert('确保OD房和上班人数有值')
             return;
         }
         // 先分配双床房，确保更公平
-        const scDistribute = distributeIntegers(formValues.sc, formValues.num);
+        const od_scDistribute = distributeIntegers(formValues.od_sc, formValues.num);
         // 再分配单床房,因为双床是从多到少分配，所以单床需要从少到多分配
-        const dcDistribute = distributeIntegers(formValues.od - formValues.sc, formValues.num, true);
-        // oD间统计：双床 + 单床
-        const odDistribute = scDistribute.map((i,index) => (i + dcDistribute[index]));       
+        const od_dcDistribute = distributeIntegers(formValues.od - formValues.od_sc, formValues.num, true);
+        // OD间统计：od_sc + od_dc
+        const odDistribute = od_scDistribute.map((i,index) => (i + od_dcDistribute[index]));
+        // VD房：这个房间相对比较少，所以不区分双/单床
+        // VD和隔夜房两个，为了公平，采取一个多到少，一个少到多。
+        const vdDistribute = distributeIntegers(formValues.vd, formValues.num);
         // 隔夜分配
-        const gyDistribute = distributeIntegers(formValues.gy, formValues.num);
+        const gyDistribute = distributeIntegers(formValues.gy, formValues.num,true);
         // 显示结果
-        const formResult = document.querySelector('.form-result');
-        while(formResult.firstChild) {
-            formResult.removeChild(formResult.firstChild);
-        }
-        // 生成一个0 - num-1的随机数组,目的是为了，打乱人员顺序，也是确保每个人分配的公平
-        const randomArr = shuffleArray(new Array(formValues.num).fill('').map((_,index) => index));
-        randomArr.forEach((num,index) => {
-            const numResult = document.createElement('div');
-            numResult.innerHTML = [
-                `<div style="text-align:center"><span style="background:#CC6600;padding:0 4px;">人员${index + 1}</span></div>`,
-                `<div><span style="background:#FF3366;padding:0 4px;">od房:</span>&nbsp;${odDistribute[num]}</div>`,
-                `<div style="margin-left:10px;"><span style="background:#0099FF;padding:0 4px;">双床房:</span>&nbsp;${scDistribute[num]}</div>`,
-                `<div style="margin-left:10px;"><span style="background:#66CCCC;padding:0 4px;">单床房:</span>&nbsp;${dcDistribute[num]}</div>`,
-                `<div><span style="background:#CCCCCC;padding:0 4px;">隔夜房:</span>&nbsp;${gyDistribute[num]}</div>`,
-                `<div><span style="background:#FFCC33;padding:0 4px;">共计房:</span>&nbsp;<span style="color:#FF0066;ont-weigh:bold;">${odDistribute[num] + gyDistribute[num]}</span></div>`,
-            ].join('');
-            numResult.className = 'result-item'
-            formResult.appendChild(numResult)
-        })
+        disPlayDistributeResult({
+            vdDistribute,
+            odDistribute,
+            od_scDistribute,
+            od_dcDistribute,
+            gyDistribute
+        },formValues.num)
     })
 </script>
 </html>
