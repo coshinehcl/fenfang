@@ -159,32 +159,31 @@
     }
     const btn = document.querySelector('.form button');
     const items = document.querySelectorAll('.form .item');
-    function disPlayDistributeResult(config,menberNum) {
-        const { vdDistribute,odDistribute,od_scDistribute,od_dcDistribute,gyDistribute } = config || {};
+    function disPlayDistributeResult(membersRoom) {
         // 移除老结果数据
         const formResult = document.querySelector('.form-result');
         while(formResult.firstChild) {
             formResult.removeChild(formResult.firstChild);
         }
         // 显示新结果数据
-        const memberArr = new Array(menberNum).fill('').map((_,index) => index);// [0,1,2,..]
-        const randomMenber = shuffleArray(memberArr); // [2,3,1,..]
+        // 编号打乱，确保分配到实际人，会更公平
+        const memberIdArr = new Array(membersRoom.length).fill('').map((_,index) => index);// [0,1,2,..]
+        const randomMenberIdArr = shuffleArray(memberIdArr); // [2,3,1,..]
         let busyZindex = 0; // 是否比较忙，忙的程度是什么
-        randomMenber.forEach((menberId,index) => {
+        randomMenberIdArr.forEach((menberId,index) => {
             const nemberResult = document.createElement('div');
-            const total = odDistribute[menberId] + vdDistribute[menberId] + gyDistribute[menberId];
+            const roomsItem = membersRoom.find(i => i.id === menberId);
             const resultHeader = [
                 `<div class="info">人员${index + 1}</div>`,
-                `<div class="info">房间总数&nbsp;<span class="distribute_total bold">${total}</span></div>`,
+                `<div class="info">房间总数&nbsp;<span class="distribute_total bold">${roomsItem.total}</span></div>`,
             ].join('');
             const resultContent = [
-                // `<div class="content-item" style="--color:#9966FF"><span>OD房</span><span>${odDistribute[menberId]}</span></div>`,
-                `<div class="content-item" style="--color:#9900FF"><span>OD双床房</span><span class="bold">${od_scDistribute[menberId]}</span></div>`,
-                `<div class="content-item" style="--color:#660099"><span>OD单床房</span><span class="bold">${od_dcDistribute[menberId]}</span></div>`,
-                `<div class="content-item" style="--color:#3366FF"><span>VD房</span><span class="bold">${vdDistribute[menberId]}</span></div>`,
-                `<div class="content-item" style="--color:#000000"><span>隔夜房</span><span class="bold">${gyDistribute[menberId]}</span></div>`,
+                `<div class="content-item" style="--color:#9900FF"><span>OD双床房</span><span class="bold">${roomsItem.detail.od_sc}</span></div>`,
+                `<div class="content-item" style="--color:#660099"><span>OD单床房</span><span class="bold">${roomsItem.detail.od_dc}</span></div>`,
+                `<div class="content-item" style="--color:#3366FF"><span>VD房</span><span class="bold">${roomsItem.detail.vd}</span></div>`,
+                `<div class="content-item" style="--color:#000000"><span>隔夜房</span><span class="bold">${roomsItem.detail.gy}</span></div>`,
             ].join('');
-            const roomActualNum = odDistribute[menberId] + vdDistribute[menberId]; // 统计真实要打扫的房间数量
+            const roomActualNum = roomsItem.detail.od_sc + roomsItem.detail.od_dc + roomsItem.detail.vd; // 统计真实要打扫的房间数量
             if(roomActualNum > 20) {
                 busyZindex +=1;
             } else {
@@ -202,6 +201,11 @@
         tipNode.className = "result-tip";
         tipNode.innerText = busyZindex > 0 ? '今天房间较多，辛苦你啦~' : '今天房间较少，抓好卫生';
         formResult.appendChild(tipNode);
+        // 庶民 + 日期
+        const dateNode = document.createElement('div');
+        dateNode.className = "result-tip";
+        dateNode.innerText = `分配日期： ${new Date().toLocaleDateString()}`
+        formResult.appendChild(dateNode);
         // 滚动到结果区域
         formResult.scrollIntoView({behavior:'smooth',block:'center'});
     }
@@ -215,28 +219,48 @@
             alert('确保OD房和上班人数有值')
             return;
         }
-        // 先分配双床房，确保更公平
+        if(formValues.od < formValues.od_sc) {
+            alert('OD房比OD双床少，检查数据准确性')
+            return;
+        }
+        // 生成用户编号及房间分配情况
+        // 后续添加进来，这个数组的total要多到少(及时排序)，后续添加进来的时候从少到多，确保各项的total接近
+        const membersRoom = new Array(formValues.num).fill('').map((i,index) => ({
+            id:index,
+            total:0,
+            detail:{}
+        }))
+        function updateMenbersRoom(arr,field){
+            // 我们先更新membersRoom排序(total:多到少)
+            membersRoom.sort((l,r) => {
+                if(l.total < r.total) {
+                    return 1;
+                } else if(l.total === r.total) {
+                    return 0;
+                } else {
+                    return -1
+                }
+            })
+            // 再更新数据进来(arr:少到多)
+            membersRoom.forEach((i,index) => {
+                i.total += arr[index];
+                i.detail[field] = arr[index];
+            })
+        }
+        // OD-双床房
         const od_scDistribute = distributeIntegers(formValues.od_sc, formValues.num);
-        // 再分配单床房,因为双床是从多到少分配，所以单床需要从少到多分配
-        const od_dcDistribute = distributeIntegers(formValues.od - formValues.od_sc, formValues.num, true);
-        // OD间统计：od_sc + od_dc
-        const odDistribute = od_scDistribute.map((i,index) => (i + od_dcDistribute[index]));
-        // VD房：这个房间相对比较少，所以不区分双/单床
-        // VD和gy排序要根据前面的来动态调整，达到总数接近
-        let sortUp = odDistribute[odDistribute.length - 1] - odDistribute[0] > 0
-        const vdDistribute = distributeIntegers(formValues.vd, formValues.num,!sortUp);
-        // 隔夜分配
-        let beforeArr = odDistribute.map((i,index) => (i + vdDistribute[index]));
-        sortUp = beforeArr[beforeArr.length - 1] - beforeArr[0] > 0
-        const gyDistribute = distributeIntegers(formValues.gy, formValues.num,!sortUp);
+        updateMenbersRoom(od_scDistribute,'od_sc')
+        // OD-单床
+        const od_dcDistribute = distributeIntegers(formValues.od - formValues.od_sc, formValues.num,true);
+        updateMenbersRoom(od_dcDistribute,'od_dc')
+        // VD房
+        const vdDistribute = distributeIntegers(formValues.vd, formValues.num,true);
+        updateMenbersRoom(vdDistribute,'vd')
+        // 隔夜房(隔夜房需要放在最后)
+        const gyDistribute = distributeIntegers(formValues.gy, formValues.num,true);
+        updateMenbersRoom(gyDistribute,'gy')
         // 显示结果
-        disPlayDistributeResult({
-            vdDistribute,
-            odDistribute,
-            od_scDistribute,
-            od_dcDistribute,
-            gyDistribute
-        },formValues.num);
+        disPlayDistributeResult(membersRoom);
     })
 </script>
 </html>
