@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>分房系统</title>
+    <title>房间分配</title>
     <style>
         body,html {
             font-size: 18px;
@@ -50,7 +50,7 @@
             box-sizing: border-box;
             display: flex;
             flex-wrap:wrap;
-            margin-bottom: 10px;
+            margin-bottom: 40px;
             justify-content: space-around;
             align-items: center;
         }
@@ -83,6 +83,29 @@
             justify-content: space-between;
             padding:2px 4px;
             color:var(--color);
+        }
+        .result-tip {
+            font-size: 14px;
+            color: #999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .result-tip::before {
+            content: '';
+            display: inline-block;
+            width: 20vw;
+            height: 1px;
+            background-color: #999;
+            margin-right: 6px;
+        }
+        .result-tip::after {
+            content: '';
+            display: inline-block;
+            width: 20vw;
+            height: 1px;
+            background-color: #999;
+            margin-left: 6px;
         }
     </style>
 </head>
@@ -146,6 +169,7 @@
         // 显示新结果数据
         const memberArr = new Array(menberNum).fill('').map((_,index) => index);// [0,1,2,..]
         const randomMenber = shuffleArray(memberArr); // [2,3,1,..]
+        let busyZindex = 0; // 是否比较忙，忙的程度是什么
         randomMenber.forEach((menberId,index) => {
             const nemberResult = document.createElement('div');
             const total = odDistribute[menberId] + vdDistribute[menberId] + gyDistribute[menberId];
@@ -159,14 +183,27 @@
                 `<div class="content-item" style="--color:#660099"><span>OD单床房</span><span class="bold">${od_dcDistribute[menberId]}</span></div>`,
                 `<div class="content-item" style="--color:#3366FF"><span>VD房</span><span class="bold">${vdDistribute[menberId]}</span></div>`,
                 `<div class="content-item" style="--color:#000000"><span>隔夜房</span><span class="bold">${gyDistribute[menberId]}</span></div>`,
-            ].join('')
+            ].join('');
+            const roomActualNum = odDistribute[menberId] + vdDistribute[menberId]; // 统计真实要打扫的房间数量
+            if(roomActualNum > 20) {
+                busyZindex +=1;
+            } else {
+                busyZindex -=1;
+            }
             nemberResult.innerHTML = [
                 `<div class="result-item-header">${resultHeader}</div>`,
                 `<div class="result-item-content">${resultContent}</div>`,
             ].join('');
             nemberResult.className = 'result-item'
             formResult.appendChild(nemberResult)
-        })
+        });
+        // 文案提醒
+        const tipNode = document.createElement('div');
+        tipNode.className = "result-tip";
+        tipNode.innerText = busyZindex > 0 ? '今天房间较多，辛苦你啦~' : '今天房间较少，抓好卫生';
+        formResult.appendChild(tipNode);
+        // 滚动到结果区域
+        formResult.scrollIntoView({behavior:'smooth',block:'center'});
     }
     btn.addEventListener('click',()=> {
         const formValues = {};
@@ -196,7 +233,7 @@
             od_scDistribute,
             od_dcDistribute,
             gyDistribute
-        },formValues.num)
+        },formValues.num);
     })
 </script>
 </html>
