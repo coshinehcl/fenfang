@@ -33,6 +33,7 @@
             border:1px solid #333;
             font-size: 16px;
             padding: 0 10px;
+            width:100px;
         }
         .form .item input:focus {
             border-color: blue;
@@ -50,7 +51,7 @@
             box-sizing: border-box;
             display: flex;
             flex-wrap:wrap;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             justify-content: space-around;
             align-items: center;
         }
@@ -68,7 +69,7 @@
             padding:4px;
             border-bottom: 1px solid #dfe1e5;
         }
-        .form-result .distribute_total {
+        .form-result .distribute_total,.form-result .new_member_tag  {
             color:#FF0033;
         }
         .bold {
@@ -84,14 +85,17 @@
             padding:2px 4px;
             color:var(--color);
         }
-        .result-tip {
+        .form-result-help {
+            margin-bottom: 40px;
+        }
+        .form-result-help .result-tip {
             font-size: 14px;
             color: #999;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .result-tip::before {
+        .form-result-help .result-tip::before {
             content: '';
             display: inline-block;
             width: 20vw;
@@ -99,13 +103,33 @@
             background-color: #999;
             margin-right: 6px;
         }
-        .result-tip::after {
+        .form-result-help .result-tip::after {
             content: '';
             display: inline-block;
             width: 20vw;
             height: 1px;
             background-color: #999;
             margin-left: 6px;
+        }
+        .form-result-help .result-validate-title {
+            text-align: center;
+            border-top: 1px solid #999;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+        .form-result-help .result-validate-item {
+            padding: 4px 10px;
+        }
+        .form-result-help .result-validate-item-compare {
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+        }
+        .form-result-help .result-validate-item-compare-tag {
+            display: inline-block;
+            text-align: right;
+            width: 40px;
         }
     </style>
 </head>
@@ -131,11 +155,19 @@
             <label for="num">上班人数</label>
             <input id="num" type="number" placeholder="0">
         </div>
+        <div class="item">
+            <label>新人</label>
+            <input id="xr_sc" type="number" placeholder="双床房">
+            <input id="xr_dc" type="number" placeholder="单床房">
+            <input id="xr_vd" type="number" placeholder="VD房">
+            <input id="xr_gy" type="number" placeholder="隔夜房">
+        </div>
         <div class="item-btn">
             <button class="bold">分配</button>
         </div>
     </div>
     <div class="form-result"></div>
+    <div class="form-result-help"></div>
 </body>
 <script>
     function shuffleArray(array) {
@@ -159,22 +191,31 @@
     }
     const btn = document.querySelector('.form button');
     const items = document.querySelectorAll('.form .item');
-    function disPlayDistributeResult(membersRoom) {
+    function disPlayDistributeResult(membersRoom,xrRoom,originRoomValue) {
         // 移除老结果数据
         const formResult = document.querySelector('.form-result');
         while(formResult.firstChild) {
             formResult.removeChild(formResult.firstChild);
         }
+        const formResultHelp = document.querySelector('.form-result-help');
+        while(formResultHelp.firstChild) {
+            formResultHelp.removeChild(formResultHelp.firstChild);
+        }
         // 显示新结果数据
         // 编号打乱，确保分配到实际人，会更公平
         const memberIdArr = new Array(membersRoom.length).fill('').map((_,index) => index);// [0,1,2,..]
-        const randomMenberIdArr = shuffleArray(memberIdArr); // [2,3,1,..]
+        let randomMenberIdArr = shuffleArray(memberIdArr); // [2,3,1,..]
+        if(xrRoom && xrRoom.detail && xrRoom.total) {
+            randomMenberIdArr = [-1,...randomMenberIdArr];
+        }
         let busyZindex = 0; // 是否比较忙，忙的程度是什么
+        const resultArr = [];
         randomMenberIdArr.forEach((menberId,index) => {
             const nemberResult = document.createElement('div');
-            const roomsItem = membersRoom.find(i => i.id === menberId);
+            const roomsItem = menberId === -1 ? xrRoom : membersRoom.find(i => i.id === menberId);
+            resultArr.push(roomsItem);
             const resultHeader = [
-                `<div class="info">人员${index + 1}</div>`,
+                `<div class="info">人员${index + 1}<span class="new_member_tag">${menberId === -1 ? '&nbsp;(新人)' : ''}</span></div>`,
                 `<div class="info">房间总数&nbsp;<span class="distribute_total bold">${roomsItem.total}</span></div>`,
             ].join('');
             const resultContent = [
@@ -196,24 +237,93 @@
             nemberResult.className = 'result-item'
             formResult.appendChild(nemberResult)
         });
+        // 数据校验
+        const resultValidateNode = document.createElement('div');
+        resultValidateNode.className = 'result-validate';
+        const resultTotal = resultArr.reduce((total,cur) => {total+=cur.total;return total;},0);
+        const originTotal = originRoomValue.od + originRoomValue.vd + originRoomValue.gy;
+        const resultSc = resultArr.reduce((total,cur) => {total+=cur.detail.od_sc;return total;},0);
+        const originSc = originRoomValue.od_sc;
+        const resultDc = resultArr.reduce((total,cur) => {total+=cur.detail.od_dc;return total;},0);
+        const originDc = originRoomValue.od_dc;
+        const resultVd = resultArr.reduce((total,cur) => {total+=cur.detail.vd;return total;},0);
+        const originVd = originRoomValue.vd;
+        const resultGy = resultArr.reduce((total,cur) => {total+=cur.detail.gy;return total;},0);
+        const originGy = originRoomValue.gy;
+        resultValidateNode.innerHTML = [
+                `<div class="result-validate-title">各类房间分配统计</div>`,
+                `<div class="result-validate-item">
+                    <div style="color:#FF0033">总房间</div>
+                    <div class="result-validate-item-compare">
+                        <div>分配：${resultArr.map(i => i.total).join('+')} = ${resultTotal}</div>
+                        <div>
+                            <span>原有：OD(${originRoomValue.od})+VD(${ originRoomValue.vd})+隔夜(${originRoomValue.gy}) = ${originTotal}</span>
+                            <span class="result-validate-item-compare-tag">${resultTotal === originTotal ? '✅' : '❌'}</span>
+                        </div>
+                    </div>
+                </div>`,
+                `<div class="result-validate-item">
+                    <div style="color:#9900FF">OD双床</div>
+                    <div class="result-validate-item-compare">
+                        <div>分配：${resultArr.map(i => i.detail.od_sc).join('+')} = ${resultSc}</div>
+                        <div>
+                            <span>原有:${originSc}</span>
+                            <span class="result-validate-item-compare-tag">${resultSc === originSc ? '✅' : '❌'}</span>
+                        </div>
+                    </div>
+                </div>`,
+                `<div class="result-validate-item">
+                    <div style="color:#660099">OD单床</div>
+                    <div class="result-validate-item-compare">
+                        <div>分配：${resultArr.map(i => i.detail.od_dc).join('+')} = ${resultDc}</div>
+                        <div>
+                            <span>原有：OD(${originRoomValue.od})-OD双床(${originRoomValue.od_sc}) = ${originRoomValue.od_dc}</span>
+                            <span class="result-validate-item-compare-tag">${resultDc === originDc ? '✅' : '❌'}</span>
+                        </div>
+                    </div>
+                </div>`,
+                `<div class="result-validate-item">
+                    <div style="color:#3366FF;">VD房</div>
+                    <div class="result-validate-item-compare">
+                        <div>分配：${resultArr.map(i => i.detail.vd).join('+')} = ${resultVd}</div>
+                        <div>
+                            <span>原有：${originVd}</span>
+                            <span class="result-validate-item-compare-tag">${resultVd === originVd ? '✅' : '❌'}</span>
+                        </div>
+                    </div>
+                </div>`,
+                `<div class="result-validate-item">
+                    <div style="color:#000000;">隔夜房</div>
+                    <div class="result-validate-item-compare">
+                        <div>分配：${resultArr.map(i => i.detail.gy).join('+')} = ${resultGy}</div>
+                        <div>
+                            <span>原有：${originGy}</span>
+                            <span class="result-validate-item-compare-tag">${resultGy === originGy ? '✅' : '❌'}</span>
+                        </div>
+                    </div>
+                </div>`,
+        ].join('');
+        formResultHelp.appendChild(resultValidateNode);
         // 文案提醒
         const tipNode = document.createElement('div');
         tipNode.className = "result-tip";
         tipNode.innerText = busyZindex > 0 ? '今天房间较多，辛苦你啦~' : '今天房间较少，抓好卫生';
-        formResult.appendChild(tipNode);
-        // 庶民 + 日期
+        formResultHelp.appendChild(tipNode);
+        // 日期
         const dateNode = document.createElement('div');
         dateNode.className = "result-tip";
         dateNode.innerText = `分配日期： ${new Date().toLocaleDateString()}`
-        formResult.appendChild(dateNode);
+        formResultHelp.appendChild(dateNode);
         // 滚动到结果区域
-        formResult.scrollIntoView({behavior:'smooth',block:'center'});
+        formResult.scrollIntoView({behavior:'smooth'});
     }
     btn.addEventListener('click',()=> {
         const formValues = {};
         Array.from(items).forEach(_item => {
-            const input = _item.querySelector('input');
-            formValues[input.id] = Number(input.value || 0);
+            const inputs = _item.querySelectorAll('input');
+            Array.from(inputs).forEach(input => {
+                formValues[input.id] = Number(input.value || 0);
+            })
         })
         if(!formValues.od || !formValues.num) {
             alert('确保OD房和上班人数有值')
@@ -222,6 +332,53 @@
         if(formValues.od < formValues.od_sc) {
             alert('OD房比OD双床少，检查数据准确性')
             return;
+        }
+        // 缺失值补上
+        formValues.od_dc = formValues.od - formValues.od_sc;
+        // 记录原始值
+        formValues.origin = {
+            od:formValues.od,
+            od_sc:formValues.od_sc,
+            od_dc:formValues.od_dc,
+            vd:formValues.vd,
+            gy:formValues.gy
+        }
+        let xrRoom = {};
+        // 判断是否有新人
+        if(formValues.xr_sc || formValues.xr_dc || formValues.xr_vd || formValues.xr_gy) {
+            // 并且校验这个值是否不超过总数
+            if(formValues.xr_sc > formValues.od_sc) {
+                alert('新人双床数据不对，请检查');
+                return;
+            }
+            if(formValues.xr_dc > formValues.od_dc) {
+                alert('新人单床数据不对，请检查');
+                return;
+            }
+            if(formValues.xr_vd > formValues.vd) {
+                alert('新人VD数据不对，请检查');
+                return;
+            }
+            if(formValues.xr_gy > formValues.gy) {
+                alert('新人隔夜数据不对，请检查');
+                return;
+            }
+            xrRoom.total = (formValues.xr_sc + formValues.xr_dc + formValues.xr_vd + formValues.xr_gy);
+            xrRoom.detail = {};
+            // 双床
+            xrRoom.detail.od_sc = formValues.xr_sc;
+            formValues.od_sc = formValues.od_sc - formValues.xr_sc;
+            // 单床
+            xrRoom.detail.od_dc = formValues.xr_dc;
+            formValues.od_dc = formValues.od_dc - formValues.xr_dc;
+            // VD
+            xrRoom.detail.vd = formValues.xr_vd;
+            formValues.vd = formValues.vd - formValues.xr_vd;
+            // 隔夜
+            xrRoom.detail.gy = formValues.xr_gy;
+            formValues.gy = formValues.gy - formValues.xr_gy;
+            // 修正参与公平排班的人数
+            formValues.num = formValues.num -1;
         }
         // 生成用户编号及房间分配情况
         // 后续添加进来，这个数组的total要多到少(及时排序)，后续添加进来的时候从少到多，确保各项的total接近
@@ -251,7 +408,7 @@
         const od_scDistribute = distributeIntegers(formValues.od_sc, formValues.num);
         updateMenbersRoom(od_scDistribute,'od_sc')
         // OD-单床
-        const od_dcDistribute = distributeIntegers(formValues.od - formValues.od_sc, formValues.num,true);
+        const od_dcDistribute = distributeIntegers(formValues.od_dc, formValues.num,true);
         updateMenbersRoom(od_dcDistribute,'od_dc')
         // VD房
         const vdDistribute = distributeIntegers(formValues.vd, formValues.num,true);
@@ -260,7 +417,7 @@
         const gyDistribute = distributeIntegers(formValues.gy, formValues.num,true);
         updateMenbersRoom(gyDistribute,'gy')
         // 显示结果
-        disPlayDistributeResult(membersRoom);
+        disPlayDistributeResult(membersRoom,xrRoom,formValues.origin);
     })
 </script>
 </html>
