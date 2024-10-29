@@ -33,7 +33,7 @@
             border:1px solid #333;
             font-size: 16px;
             padding: 0 10px;
-            width:100px;
+            width:50px;
         }
         .form .item input:focus {
             border-color: blue;
@@ -122,14 +122,7 @@
         }
         .form-result-help .result-validate-item-compare {
             color: #999;
-            display: flex;
-            justify-content: space-between;
             font-size: 15px;
-        }
-        .form-result-help .result-validate-item-compare-tag {
-            display: inline-block;
-            text-align: right;
-            width: 40px;
         }
     </style>
 </head>
@@ -216,7 +209,7 @@
             resultArr.push(roomsItem);
             const resultHeader = [
                 `<div class="info">人员${index + 1}<span class="new_member_tag">${menberId === -1 ? '&nbsp;(新人)' : ''}</span></div>`,
-                `<div class="info">房间总数&nbsp;<span class="distribute_total bold">${roomsItem.total}</span></div>`,
+                `<div class="info">总数&nbsp;<span class="distribute_total bold">${roomsItem.total}</span></div>`,
             ].join('');
             const resultContent = [
                 `<div class="content-item" style="--color:#9900FF"><span>OD双床房</span><span class="bold">${roomsItem.detail.od_sc}</span></div>`,
@@ -251,55 +244,45 @@
         const resultGy = resultArr.reduce((total,cur) => {total+=cur.detail.gy;return total;},0);
         const originGy = originRoomValue.gy;
         resultValidateNode.innerHTML = [
-                `<div class="result-validate-title">各类房间分配统计</div>`,
+                `<div class="result-validate-title">房间分配统计</div>`,
                 `<div class="result-validate-item">
                     <div style="color:#FF0033">总房间</div>
                     <div class="result-validate-item-compare">
                         <div>分配：${resultArr.map(i => i.total).join('+')} = ${resultTotal}</div>
-                        <div>
-                            <span>原有：OD(${originRoomValue.od})+VD(${ originRoomValue.vd})+隔夜(${originRoomValue.gy}) = ${originTotal}</span>
-                            <span class="result-validate-item-compare-tag">${resultTotal === originTotal ? '✅' : '❌'}</span>
-                        </div>
+                        <div>原有：OD(${originRoomValue.od})+VD(${ originRoomValue.vd})+隔夜(${originRoomValue.gy}) = ${originTotal}</div>
+                        <div class="result-validate-item-compare-tag">是否对的上：${resultTotal === originTotal ? '✅' : '❌'}</div>
                     </div>
                 </div>`,
                 `<div class="result-validate-item">
                     <div style="color:#9900FF">OD双床</div>
                     <div class="result-validate-item-compare">
                         <div>分配：${resultArr.map(i => i.detail.od_sc).join('+')} = ${resultSc}</div>
-                        <div>
-                            <span>原有:${originSc}</span>
-                            <span class="result-validate-item-compare-tag">${resultSc === originSc ? '✅' : '❌'}</span>
-                        </div>
+                        <div>原有：${originSc}</div>
+                        <div class="result-validate-item-compare-tag">是否对的上：${resultSc === originSc ? '✅' : '❌'}</div>
                     </div>
                 </div>`,
                 `<div class="result-validate-item">
                     <div style="color:#660099">OD单床</div>
                     <div class="result-validate-item-compare">
                         <div>分配：${resultArr.map(i => i.detail.od_dc).join('+')} = ${resultDc}</div>
-                        <div>
-                            <span>原有：OD(${originRoomValue.od})-OD双床(${originRoomValue.od_sc}) = ${originRoomValue.od_dc}</span>
-                            <span class="result-validate-item-compare-tag">${resultDc === originDc ? '✅' : '❌'}</span>
-                        </div>
+                        <div>原有：OD(${originRoomValue.od})-OD双床(${originRoomValue.od_sc}) = ${originRoomValue.od_dc}</div>
+                        <div class="result-validate-item-compare-tag">是否对的上：${resultDc === originDc ? '✅' : '❌'}</div>
                     </div>
                 </div>`,
                 `<div class="result-validate-item">
                     <div style="color:#3366FF;">VD房</div>
                     <div class="result-validate-item-compare">
                         <div>分配：${resultArr.map(i => i.detail.vd).join('+')} = ${resultVd}</div>
-                        <div>
-                            <span>原有：${originVd}</span>
-                            <span class="result-validate-item-compare-tag">${resultVd === originVd ? '✅' : '❌'}</span>
-                        </div>
+                        <div>原有：${originVd}</div>
+                        <div class="result-validate-item-compare-tag">是否对的上：${resultVd === originVd ? '✅' : '❌'}</div>
                     </div>
                 </div>`,
                 `<div class="result-validate-item">
                     <div style="color:#000000;">隔夜房</div>
                     <div class="result-validate-item-compare">
                         <div>分配：${resultArr.map(i => i.detail.gy).join('+')} = ${resultGy}</div>
-                        <div>
-                            <span>原有：${originGy}</span>
-                            <span class="result-validate-item-compare-tag">${resultGy === originGy ? '✅' : '❌'}</span>
-                        </div>
+                        <div>原有：${originGy}</div>
+                        <div class="result-validate-item-compare-tag">是否对的上：${resultGy === originGy ? '✅' : '❌'}</div>
                     </div>
                 </div>`,
         ].join('');
