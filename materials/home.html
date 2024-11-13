@@ -43,14 +43,20 @@
             margin:6px;
             padding:8px;
         }
-        .content .form-wrapper .form-date-wrapper input{
+        .content .form-wrapper .form-date-wrapper input,.content .form-wrapper .form-date-select{
+            margin-left: 4px;
             height: 32px;
+            width:calc(50% - 46px);
             outline: none;
             border:1px solid #333;
             border-radius: 10000px;
             box-sizing: border-box;
             padding-left:10px;
             font-size: 16px;
+        }
+        .form-date-record-date {
+            color:red;
+            margin-top: 6px;
         }
         .content .input-block {
             padding-bottom: 10px;
@@ -102,6 +108,22 @@
         }
     </style>
     <style>
+        .view-select-wrapper {
+            margin:6px;
+            padding:8px;
+        }
+        .view-select {
+            width:33%;
+            height: 32px;
+            display: inline-block;
+            margin-left: 10px;
+            line-height: 32px;
+            text-align: center;
+            border: 1px solid #999;
+            padding: 4px 8px;
+            border-radius: 20px;
+            outline: none;
+        }
         .view-item-title {
             height: 30px;
             line-height: 30px;

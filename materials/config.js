@@ -9,7 +9,12 @@ export const materialsList = [
             {
                 label:'包'
             }
-        ]
+        ],
+        // 用量，给个范围，给出库提供
+        dosage:{
+            min:1,
+            max:100
+        }
     },
     {
         label:'卷纸',
