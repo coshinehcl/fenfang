@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仓库物料数量</title>
+    <script src="./index.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <style>
+        html,body {
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+        }
+        .action {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #999;
+        }
+        .action-item {
+            margin:10px;
+            border: 1px solid #999;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        .action-item.active {
+            color:#315efb;
+            border-color:#315efb
+        }
+        .content > div {
+            margin-bottom: 20px;
+        }
+    </style>
+    <style>
+        /* 表单样式 */
+        .content .form-wrapper {
+            padding: 0;
+        }
+        .content .form-wrapper .form-date-wrapper {
+            border: 1px solid #999;
+            border-radius: 4px;
+            margin:6px;
+            padding:8px;
+        }
+        .content .form-wrapper .form-date-wrapper input{
+            height: 32px;
+            outline: none;
+            border:1px solid #333;
+            border-radius: 10000px;
+            box-sizing: border-box;
+            padding-left:10px;
+            font-size: 16px;
+        }
+        .content .input-block {
+            padding-bottom: 10px;
+            border-bottom: 1px solid #999;
+        }
+        .content .form-block-title {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            color:#315efb;
+            font-weight: bold;
+        }
+        .content .form-block-content-item {
+            margin:6px;
+            padding:8px;
+            border: 1px solid #999;
+            border-radius: 4px;
+        } 
+        .content .form-block-content-item .form-block-content-item-label {
+            font-weight: bold;
+        }
+        .form-block-content-item-input-block{
+            width:33%;
+            display: inline-block;
+            border-radius: 10000px;
+            border:1px solid #333;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .form-block-content-item-input-block input{
+            width: calc(100% - 20px);
+            height: 32px;
+            outline: none;
+            border: none;
+            border-radius: 10000px;
+            box-sizing: border-box;
+            padding-left:10px;
+            font-size: 16px;
+        }
+        .form-wrapper .form-submit {
+            width:33%;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border: 1px solid #999;
+            padding: 4px 8px;
+            border-radius: 20px;
+            margin:0 auto;
+        }
+    </style>
+    <style>
+        .view-item-title {
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            color:#315efb;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="action">
+        <div class="action-item" data-type="input">填写数据</div>
+        <div class="action-item" data-type="view">查看数据</div>
+        <div class="action-item" data-type="inOutData">导入导出数据</div>
+    </div>
+    <div class="content"></div>
+</body>
+<script>
+   const actionItems = document.querySelectorAll('.action-item');
+   const contentNode =  document.querySelector('.content');
+   function waitMainScriptLoad(){
+     return new Promise(resolve => {
+        const timer = setInterval(()=> {
+            if(window.fireAction) {
+                clearInterval(timer);
+                resolve();
+            }
+        },50)
+     })
+   }
+   Array.from(actionItems).forEach(item => {
+        item.addEventListener('click',()=> {
+            // item兄弟取消active
+            Array.from(actionItems).forEach(i => {
+                i.classList.remove('active')
+            })
+            item.classList.add('active');
+            // 先全部隐藏
+            Array.from(contentNode.children).forEach(i => {
+                i.style.display="none";
+            })
+            // 再展示当前需要的模块
+            const itemType = item.dataset.type;
+            // 更新location
+            window.location.hash = itemType;
+            const itemClassName = `content-type-${itemType}`;
+            const itemContent = contentNode.querySelector(`.${itemClassName}`);
+            if(itemContent) {
+                itemContent.style.display = 'block';
+            } else {
+                const node = document.createElement('div');
+                node.className = itemClassName;
+                contentNode.appendChild(node);
+                waitMainScriptLoad().then(()=> {
+                    window.fireAction(node,itemType)
+                })
+            }
+        })
+   })
+</script>
+</html>
