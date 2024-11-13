@@ -164,7 +164,7 @@ const inputAction = (node)=> {
                         tagName:'div',
                         childs:[
                             {
-                                tagName:'label',
+                                tagName:'div',
                                 innerText:'选择日期：',
                             },
                             {
