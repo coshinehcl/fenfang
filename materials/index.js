@@ -3,7 +3,7 @@ import { createElement } from './createElement.js'
 import { getCacheData,setCacheData } from './storage.js'
 import { getDate } from './utils.js'
 // 表单模块
-const inputCommon = (formData,field,node,title,formDataChangeCb) => {
+const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInputs) => {
     const inputModule = createElement({
         tagName:'div',
         className:`form-block ${field}`,
@@ -40,6 +40,9 @@ const inputCommon = (formData,field,node,title,formDataChangeCb) => {
         createElement({
             tagName:'div',
             className:'form-block-content-item',
+            attributes:{
+                'data-belong':title
+            },
             childs:[
                 {
                     tagName:'div',
@@ -53,6 +56,9 @@ const inputCommon = (formData,field,node,title,formDataChangeCb) => {
                         marginTop:'6px',
                     },
                     childs:i.numList.map((inputNumItem,_index) => {
+                        if(hiddenBeforeInputs && _index !== i.numList.length -1) {
+                            return;
+                        }
                         return {
                             tagName:'div',
                             className:'form-block-content-item-input-block',
@@ -106,7 +112,7 @@ const inputCommon = (formData,field,node,title,formDataChangeCb) => {
                             ]
                         
                         }
-                    })
+                    }).filter(i => Boolean(i))
                 },
                 {
                     tagName:'div',
@@ -277,7 +283,7 @@ const inputAction = (node)=> {
         }
         inputCommon(formData,'purchase',formContentNode,'采购数量',formDataChangeCb);
         inputCommon(formData,'repo',formContentNode,'当前仓库数量',formDataChangeCb);
-        inputCommon(formData,'system',formContentNode,'系统库存数量',formDataChangeCb);
+        inputCommon(formData,'system',formContentNode,'系统库存数量',formDataChangeCb,true);
     }
     renderForm();
 }
