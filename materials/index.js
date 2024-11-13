@@ -391,10 +391,101 @@ const viewAction = (node) => {
         console.log(viewData)
     }
 }
+// 导入导出模块
+const inOutAction = (node) => {
+    const jsonId = '仓库物料'
+    function downloadJSON() {
+        // 将数据转换为JSON字符串
+        const jsonString = JSON.stringify({
+            jsonId, // 作为鉴别是不是本json
+            list:getCacheData('formDateList') || []
+        }, null, 2); // 格式化JSON字符串，增加可读性
+        // 创建一个Blob对象
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        // 创建一个链接元素
+        const link = document.createElement('a');
+        // 设置链接的href为Blob对象的URL
+        link.href = URL.createObjectURL(blob);
+        // 设置下载的文件名
+        link.download = '仓库物料数据';
+        // 触发点击事件以下载文件
+        link.click();
+        // 释放Blob URL
+        URL.revokeObjectURL(link.href);
+    }
+    createElement({
+        tagName:'div',
+        className:'in-out-block',
+        childs:[{
+            tagName:'input',
+            attributes:{
+                type:'file',
+                id:'inOutInput',
+                accept:'.json'
+            },
+            style:{
+                display:'none'
+            },
+            events:{
+                input(event){
+                    const file = event.target.files[0];
+                    if (file.type !== 'application/json') {
+                        alert('请选择 JSON 文件！')
+                        event.target.value = ''; // 清空选择
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        let jsonData;
+                        try {
+                            jsonData = JSON.parse(e.target.result);
+                        } catch (error) {
+                            alert('文件内容不是有效的 JSON 格式！');
+                            return;
+                        }
+                        if(jsonData) {
+                            // 进一步校验数据格式
+                            if(jsonData.jsonId === jsonId) {
+                                setCacheData('formDateList',jsonData.list);
+                                alert('导入成功')
+                            }
+                        } else {
+                            alert('JSON 格式不对，请检查！');
+                        }
+                        event.target.value = ''; // 清空
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        },{
+            tagName:'label',
+            className:'in-out-btn',
+            innerText:'导入',
+            attributes:{
+                for:'inOutInput'
+            },
+            events:{
+                click(){
+
+                }
+            }
+        },{
+            tagName:'div',
+            className:'in-out-btn',
+            innerText:'导出',
+            events:{
+                click(){
+                    downloadJSON();
+                }
+            }
+        }]
+    },node)
+}
 const fireAction = (node,type) => {
     const actionMap = {
         input:inputAction,
         view:viewAction,
+        inOutData:inOutAction
     }
     actionMap[type](node)
 }
