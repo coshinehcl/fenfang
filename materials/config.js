@@ -1,235 +1,230 @@
 export const materialsList = [
     {
-        label:'抽纸',
-        units:[
-            {
-                label:'箱',
-                spec:60
-            },
-            {
-                label:'包'
-            }
-        ],
-        // 用量，给个范围，给出库提供
-        dosage:{
-            min:1,
-            max:100
-        }
-    },
-    {
-        label:'卷纸',
-        units:[
-            {
-                label:'包',
-                spec:10
-            },
-            {
-                label:'提',
-                spec:12
-            },
-            {
-                label:'卷',
-            }
-        ]
-    },
-    {
-        label:'茶叶',
-        units:[
-            {
-                label:'箱',
-                spec:50
-            },
-            {
-                label:'盒',
-                spec:50
-            },
-            {
-                label:'包',
-            }
-        ]
-    },
-    {
-        label:'咖啡',
-        units:[
-            {
-                label:'箱',
-                spec:250
-            },
-            {
-                label:'包'
-            }
-        ]
-    },
-    {
         label:'沐浴露',
-        units:[
+        specs:[
             {
-                label:'箱',
+                unit:'箱',
                 spec:24
             },
             {
-                label:'瓶'
+                unit:'瓶'
             }
         ]
     },
     {
         label:'洗发水',
-        units:[
+        specs:[
             {
-                label:'箱',
+                unit:'箱',
                 spec:24
             },
             {
-                label:'瓶'
+                unit:'瓶'
             }
         ]
     },
     {
         label:'洗手液',
-        units:[
+        specs:[
             {
-                label:'箱',
+                unit:'箱',
                 spec:24
             },
             {
-                label:'瓶'
+                unit:'瓶'
             }
         ]
     },
     {
-        label:'拖鞋',
-        units:[
+        label:'乐百氏矿泉水',
+        specs:[
             {
-                label:'包',
+                unit:'箱',
+                spec:24
+            },
+            {
+                unit:'瓶'
+            }
+        ]  
+    },
+    {
+        label:'美加净牙膏',
+        specs:[
+            {
+                unit:'箱',
                 spec:500
             },
             {
-                label:'双'
+                unit:'支'
             }
         ]
     },
     {
-        label:'拖鞋(小)',
-        units:[
+        label:'纤纯抽纸',
+        specs:[
             {
-                label:'包',
-                spec:700
+                unit:'箱',
+                spec:60
             },
             {
-                label:'双'
+                unit:'包'
             }
-        ]
+        ],
     },
     {
-        label:'儿童拖鞋',
-        units:[
+        label:'白色垃圾袋',
+        specs:[
             {
-                label:'包',
-                spec:300
-            },
-            {
-                label:'双'
-            }
-        ]
-    },
-    {
-        label:'儿童牙刷',
-        units:[
-            {
-                label:'箱',
-                spec:250
-            },
-            {
-                label:'支'
-            }
-        ]
-    },
-    {
-        label:'灰色牙刷',
-        units:[
-            {
-                label:'箱',
-                spec:500
-            },
-            {
-                label:'支'
-            }
-        ]
-    },
-    {
-        label:'米白牙刷',
-        units:[
-            {
-                label:'箱',
-                spec:500
-            },
-            {
-                label:'支'
-            }
-        ]
-    },
-    {
-        label:'梳子',
-        units:[
-            {
-                label:'箱',
-                spec:500
-            },
-            {
-                label:'支'
-            }
-        ]
-    },
-    {
-        label:'牙膏',
-        units:[
-            {
-                label:'箱',
-                spec:500
-            },
-            {
-                label:'支'
-            }
-        ]
-    },
-    {
-        label:'大垃圾袋',
-        units:[
-            {
-                label:'包',
-                spec:20
-            },
-            {
-                label:'扎',
-                spec:50
-            },
-            {
-                label:'条'
-            }
-        ]
-    },
-    {
-        label:'小垃圾袋',
-        units:[
-            {
-                label:'扎',
+                unit:'扎',
                 spec:1000
             },
             {
-                label:'条'
+                unit:'个'
             }
         ]
     },
     {
-        label:'矿泉水',
-        units:[
+        label:'纤纯卷纸',
+        specs:[
             {
-                label:'箱',
-                spec:24
+                unit:'包',
+                spec:10
             },
             {
-                label:'瓶'
+                unit:'提',
+                spec:12
+            },
+            {
+                unit:'卷',
+            },
+        ]
+    },
+    {
+        label:'QZD拖鞋',
+        specs:[
+            {
+                unit:'包',
+                spec:700
+            },
+            {
+                unit:'双'
             }
-        ]  
-    }
+        ]
+    },
+    {
+        label:'黑色垃圾袋',
+        specs:[
+            {
+                unit:'包',
+                spec:20
+            },
+            {
+                unit:'扎',
+                spec:50
+            },
+            {
+                unit:'条'
+            }
+        ]
+    },
+    {
+        label:'真美布拖鞋',
+        specs:[
+            {
+                unit:'包',
+                spec:500
+            },
+            {
+                unit:'双'
+            }
+        ]
+    },
+    {
+        label:'神叶红茶',
+        specs:[
+            {
+                unit:'箱',
+                spec:50
+            },
+            {
+                unit:'盒',
+                spec:50
+            },
+            {
+                unit:'包',
+            }
+        ]
+    },
+    {
+        label:'儿童真美布拖鞋',
+        specs:[
+            {
+                unit:'包',
+                spec:300
+            },
+            {
+                unit:'双'
+            }
+        ]
+    },
+    {
+        label:'儿童牙具套餐',
+        specs:[
+            {
+                unit:'箱',
+                spec:250
+            },
+            {
+                unit:'支'
+            }
+        ]
+    },
+    {
+        label:'香蕉梳',
+        specs:[
+            {
+                unit:'箱',
+                spec:500
+            },
+            {
+                unit:'支'
+            }
+        ]
+    },
+    {
+        label:'秸秆色牙刷',
+        specs:[
+            {
+                unit:'箱',
+                spec:500
+            },
+            {
+                unit:'支'
+            }
+        ]
+    },
+    {
+        label:'秸秆浅灰牙刷',
+        specs:[
+            {
+                unit:'箱',
+                spec:500
+            },
+            {
+                unit:'支'
+            }
+        ]
+    },
+    {
+        label:'隅田川咖啡',
+        specs:[
+            {
+                unit:'箱',
+                spec:250
+            },
+            {
+                unit:'包'
+            }
+        ]
+    },
 ]

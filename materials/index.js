@@ -2,9 +2,67 @@ import { materialsList } from './config.js';
 import { createElement } from './createElement.js'
 import { getCacheData,setCacheData } from './storage.js'
 import { getDate } from './utils.js'
-// 表单模块
-const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInputs) => {
-    const inputModule = createElement({
+import defaultData from './defaultFormDataList.js'
+function init(){
+    const formDateList = getCacheData('formDateList');
+    if(!formDateList) {
+        setCacheData('formDateList',defaultData)
+    }
+}
+init();
+const recordTypes = [
+    {
+        label:'系统数量',
+        field:'system',
+        config:{
+            hiddenBeforeInputs:true
+        }
+    },
+    {
+        label:'购买数量',
+        field:'purchase',
+        config:{}
+    },
+    {
+        label:'库存数量',
+        field:'repo',
+        config:{}
+    },
+]
+// 表单和视图数据，以materialsList数据为准(可能会增删一些物料)
+function initRecordTypeItem(field,initList = []){
+    return materialsList.map(i => {
+        const initData = initList.find(_i => _i.label === i.label) || {};
+        return {
+            label:i.label,
+            numList:(initData.numList || i.specs).map(_i => ({
+                num:_i.num,
+                unit:_i.unit,
+                spec:_i.spec
+            })),
+            unit:i.specs[i.specs.length - 1].unit,
+            total:initData.total || 0,
+            totalText:initData.totalText || '',
+            totalTextFull:initData.totalTextFull || ''
+        }
+    });
+}
+function updateFormDateList(){
+    const formDateList = getCacheData('formDateList') || [];
+    if(formDateList.length) {
+        formDateList.forEach(recordItem => {
+            recordTypes.forEach(recordTypeItem => {
+                const copyList = JSON.parse(JSON.stringify(recordItem[recordTypeItem.field] || '[]'));
+                recordItem[recordTypeItem.field] = initRecordTypeItem(recordTypeItem.field,copyList);
+            })
+        })
+        setCacheData('formDateList',formDateList);
+    }
+}
+// 表单：新增/修改/移除 模块
+const createFormBlockNode = (formData,field,config) => {
+    const { node,title,setFormCache,hiddenBeforeInputs } = config;
+    const formBlockNode = createElement({
         tagName:'div',
         className:`form-block ${field}`,
         childs:[
@@ -19,27 +77,19 @@ const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInpu
             }
         ]
     },node)
-    const inputBlockContent = inputModule.querySelector('.form-block-content');
+    const formBlockContentNode = formBlockNode.querySelector('.form-block-content');
+    // 列表数据以materialsList 为准
     if(!formData[field] || !Array.isArray(formData[field])) {
-        formData[field] = materialsList.map(i => ({
-            label:i.label,
-            numList:i.units.map(_i => ({
-                num:undefined,
-                unit:_i.label,
-                spec:_i.spec
-            })),
-            unit:i.units[i.units.length - 1].label,
-            total:0,
-            totalText:'',
-            totalTextFull:''
-        }));
-        formDataChangeCb();
+        formData[field] = [];
     }
+    const copyList = JSON.parse(JSON.stringify(formData[field]));
+    formData[field] = initRecordTypeItem(field,copyList);
+    setFormCache(formData);
     formData[field].forEach((i,index) => {
-        const itemData =  formData[field][index];
+        const itemData = formData[field][index];
         createElement({
             tagName:'div',
-            className:'form-block-content-item',
+            className:'form-block-content-item item',
             attributes:{
                 'data-belong':title
             },
@@ -47,7 +97,27 @@ const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInpu
                 {
                     tagName:'div',
                     className:'form-block-content-item-label',
-                    innerText:i.label
+                    innerText:i.label,
+                    attributes:{
+                        'data-label':i.label,
+                    },
+                    events:{
+                        click(e){
+                            const sameTypesNode = node.querySelectorAll(`.form-block-content-item-label[data-label="${i.label}"]`);
+                            if(sameTypesNode) {
+                                const list = Array.from(sameTypesNode);
+                                const index = list.findIndex(i => i === e.target);
+                                console.log(index);
+                                let targetNode;
+                                if(index < list.length -1) {
+                                    targetNode = list[index + 1];
+                                } else {
+                                    targetNode = list[0]
+                                }
+                                targetNode.parentNode.scrollIntoView();
+                            }
+                        }
+                    }
                 },
                 {
                     tagName:'div',
@@ -98,7 +168,7 @@ const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInpu
                                             } else {
                                                 inputsResultNode.innerText = ''
                                             }
-                                            formDataChangeCb();
+                                            setFormCache(formData);
                                         }
                                     }
                                 },
@@ -139,24 +209,20 @@ const inputCommon = (formData,field,node,title,formDataChangeCb,hiddenBeforeInpu
                     ]
                 }
             ]
-        },inputBlockContent)
+        },formBlockContentNode)
     })
 }
-const inputAction = (node)=> {
-    // 1、采购数量
-    // 2、当前仓库数量
-    // 3、系统库存数量
-    let recordDate = getDate(new Date()).full;
-    let formData;
-    function getFormData(){
-        // 切换日期后，inputData的值会清空
-        let _formData = getCacheData('inputData');
-        if(!_formData) {
-            const formDateList = getCacheData('formDateList') || [];
-            _formData = formDateList.find(i => i.recordDate === recordDate) || {};
-        }
-        _formData.recordDate = recordDate;
-        return _formData;
+const formCommon = (node,config) => {
+    const { formType,initCacheData,createDateNode,createSubmitNodes } = config;
+    const formCacheKey = `${formType}Cache`;
+    function setFormCache(data){
+        setCacheData(formCacheKey,data)
+    }
+    function getFormCache(){
+        return getCacheData(formCacheKey);
+    }
+    if(initCacheData) {
+        setFormCache(initCacheData)
     }
     const formNode = createElement({
         tagName:'div',
@@ -164,93 +230,121 @@ const inputAction = (node)=> {
         childs:[
             {
                 tagName:'div',
-                className:'form-date-wrapper',
+                className:'form-date-wrapper item',
+                attributes:{
+                    'data-belong':'选择日期'
+                },
                 childs:[
                     {
                         tagName:'div',
-                        childs:[
-                            {
-                                tagName:'div',
-                                innerText:'选择日期：',
-                            },
-                            {
-                                tagName:'select',
-                                className:'form-date-select',
-                                events:{
-                                    input(e,topNode){
-                                        setCacheData('inputData');
-                                        recordDate = e.target.value;
-                                        const recordDateNode = topNode.querySelector('.form-date-record-date');
-                                        recordDateNode.innerText = `当前日期:${recordDate}`;
-                                        // 重新渲染
-                                        renderForm();
-                                    }
-                                },
-                                childs:(getCacheData('formDateList') || []).map(_i => ({
-                                    tagName:'option',
-                                    attributes:{
-                                        value:_i.recordDate,
-                                    },
-                                    innerText:_i.recordDate
-                                }))
-                            },
-                            {
-                                tagName:'input',
-                                className:'form-date',
-                                attributes:{
-                                    type:'date',
-                                    value:recordDate
-                                },
-                                events:{
-                                    input(e,topNode){
-                                        setCacheData('inputData');
-                                        recordDate = e.target.value;
-                                        const recordDateNode = topNode.querySelector('.form-date-record-date');
-                                        recordDateNode.innerText = `当前日期:${recordDate}`;
-                                        // 重新渲染
-                                        renderForm();
-                                    }
-                                }
-                            },
-                        ]
+                        innerText:'选择日期：',
                     },
-                    {
-                        tagName:'div',
-                        className:'form-date-record-date',
-                        innerText:`当前日期:${recordDate}`
-                    },
-                    {
-                        tagName:'div',
-                        style:{
-                            marginTop:'8px',
-                            color:'#999',
-                            fontSize: '14px'
-                        },
-                        innerText:'从记录数据或日期列表中选择一个日期'
-                    }
+                    createDateNode(setFormCache,getFormCache,renderForm)
                 ]
             },
             {
                 tagName:'div',
                 className:'form-content'
             },
-            {
+        ]
+    },node);
+    const formContentNode = formNode.querySelector('.form-content');
+    function renderForm(){
+        const formData = getCacheData(formCacheKey) || {};
+        // 重新渲染表单
+        while(formContentNode.firstChild) {
+            formContentNode.removeChild(formContentNode.firstChild);
+        }
+        if(!formData.recordDate) return;
+        recordTypes.forEach(recordTypeItem => {
+            createFormBlockNode(formData,recordTypeItem.field,{
+                node:formContentNode,
+                title:recordTypeItem.label,
+                hiddenBeforeInputs:recordTypeItem.config.hiddenBeforeInputs,
+                setFormCache
+            });
+        })
+        createElement({
+            tagName:'div',
+            className:'form-submit',
+            childs:[
+                ...createSubmitNodes(setFormCache,getFormCache)
+            ]
+        },formContentNode);
+    };
+    if((getFormCache() || {}).recordDate) {
+        renderForm();
+    }
+}
+const newDataAction = (node)=> {
+    formCommon(node,{
+        formType:'newData',
+        createDateNode(setFormCache,getFormCache,renderForm){
+            const { recordDate } = getFormCache() || {};
+            return {
+                tagName:'input',
+                className:'form-date',
+                attributes:{
+                    type:'date',
+                    value:recordDate,
+                    max:getDate(new Date()).full
+                },
+                events:{
+                    input(e){
+                        const formDateList = getCacheData('formDateList') || [];
+                        const recordDate = e.target.value;
+                        if(!recordDate) {
+                            setFormCache();
+                            renderForm();
+                            e.target.value = '';
+                            return;
+                        }
+                        const findItem = formDateList.find(i => i.recordDate === recordDate);
+                        if(findItem) {
+                            setFormCache();
+                            renderForm();
+                            e.target.value = '';
+                            alert('当前日期已有记录，不允许选择该日期')
+                            return;
+                        }
+                        setFormCache({
+                            recordDate
+                        });
+                        // 重新渲染
+                        renderForm();
+                    }
+                }
+            }
+        },
+        createSubmitNodes(setFormCache,getFormCache){
+            const formCache = getFormCache();
+            const regainInputBtn = formCache && formCache.recordDate ? [{
                 tagName:'div',
-                className:'form-submit',
-                innerText:'提交',
+                innerText:'恢复上次输入',
+                className:'form-submit-btn',
                 events:{
                     click(){
+
+                    }
+                }
+            }] : [];
+            return [
+                ...regainInputBtn,
+                {
+                tagName:'div',
+                innerText:'提交',
+                className:'form-submit-btn',
+                events:{
+                    click(){
+                        const formData = getFormCache();
                         const formDateList = getCacheData('formDateList') || [];
-                        const _formData = formDateList.find(i => i.recordDate === recordDate);
-                        if(_formData) {
-                            // 如果找到，则更新该数据
-                            Object.keys(formData).forEach(key => {
-                                _formData[key] = formData[key]
-                            })
-                        } else {
-                            formDateList.unshift(formData);
+                        const findItem =  formDateList.find(i => i.recordDate === formData.recordDate);
+                        if(findItem) {
+                            alert('缓存中已有改日期数据，请到[修改数据]中修改');
+                            return;
                         }
-                         // 排序
+                        formDateList.push(formData);
+                        // 排序
                         formDateList.sort((l,r) => {
                             const l_recordDateNumber = Number(l.recordDate.split('-').join(''));
                             const r_recordDateNumber = Number(r.recordDate.split('-').join(''));
@@ -262,233 +356,453 @@ const inputAction = (node)=> {
                                 return 1;
                             }
                         })
-                        // 更新缓存
-                        setCacheData('inputData');
+                        // 清除缓存
+                        setFormCache();
+                        // 更新物料列表数据到缓存中
                         setCacheData('formDateList',formDateList);
                         alert('已提交')
+                        location.reload();
                     }
                 }
-            }
-        ]
-    },node);
-    function renderForm(){
-        formData = getFormData();
-        function formDataChangeCb(){
-            setCacheData('inputData',formData)
+            }]
         }
-        const formContentNode = formNode.querySelector('.form-content');
-        // 重新渲染表单
-        while(formContentNode.firstChild) {
-            formContentNode.removeChild(formContentNode.firstChild);
-        }
-        inputCommon(formData,'purchase',formContentNode,'采购数量',formDataChangeCb);
-        inputCommon(formData,'repo',formContentNode,'当前仓库数量',formDataChangeCb);
-        inputCommon(formData,'system',formContentNode,'系统库存数量',formDataChangeCb,true);
-    }
-    renderForm();
+    })
 }
-// 查看数据模块
-const viewAction = (node) => {
-    Chart.register(ChartDataLabels);
-    const formDateList = getCacheData('formDateList') || [];
-    if(formDateList.length) {
-        function getDayDistance(day1,day2) {
-            const leftDate = new Date(day1);
-            const rightDate = new Date(day2);
-            const millisecondsDiff = leftDate - rightDate;
-            const daysDiff = Math.round(millisecondsDiff / (1000 * 60 * 60 * 24));
-            return daysDiff;
-        }
-        // 生成日消耗/周消耗/出仓建议
-        const viewData = {};
-        materialsList.forEach(item => {
-            if(!viewData[item.label]) {
-                viewData[item.label] = [];
+const modifyDataAction = (node)=> {
+    updateFormDateList();
+    formCommon(node,{
+        formType:'modifyData',
+        initCacheData:{},
+        createDateNode(setFormCache,getFormCache,renderForm) {
+            const formDateList =  getCacheData('formDateList') || [];
+            const optionsList = formDateList.map(_i => ({
+                tagName:'option',
+                attributes:{
+                    value:_i.recordDate,
+                },
+                innerText:_i.recordDate,
+
+            }))
+            optionsList.reverse(); // 新的日期排前面
+            optionsList.unshift(({
+                tagName:'option',
+                attributes:{
+                    value:'',
+                },
+                innerText:'请选择'
+            }))
+            return {
+                tagName:'select',
+                className:'form-date',
+                attributes:{
+                    placeholder:'请选择',
+                    value:''
+                },
+                events:{
+                    input(e){
+                        const recordDate = e.target.value
+                        if(!recordDate) {
+                            setFormCache();
+                        } else {
+                            const findItem =  formDateList.find(i => i.recordDate ===recordDate);
+                            if(!findItem) {
+                                setFormCache();
+                                alert('当前日期的数据不存在')
+                            } else {
+                                setFormCache({
+                                    recordDate,
+                                    ...findItem
+                                });
+                            }
+                        }
+                        // 重新渲染
+                        renderForm();
+                    }
+                },
+                childs:optionsList
             }
-        })
-        function getBaseData(item,index,field){
-            item[field].forEach(_item => {
-                let _itemData = viewData[_item.label][index];
-                if(!_itemData) {
-                    _itemData = {};
-                    viewData[_item.label].push(_itemData)
+        },
+        createSubmitNodes(setFormCache,getFormCache){
+            return [{
+                tagName:'div',
+                innerText:'删除',
+                className:'form-submit-btn',
+                style:{
+                    color:'red'
+                },
+                events:{
+                    click(){
+                        const confirm = window.confirm('确认删除吗')
+                        if(confirm) {
+                            const formData = getFormCache();
+                            const formDateList = getCacheData('formDateList') || [];
+                            setCacheData('formDateList',formDateList.filter(i => {
+                                return i.recordDate !== formData.recordDate
+                            }));
+                            // 清除缓存
+                            setFormCache();
+                            // 刷新页面
+                            location.reload();
+                        }
+                    }
                 }
-                _itemData[field] = _item.total
-            })
+            },{
+                tagName:'div',
+                innerText:'提交',
+                className:'form-submit-btn',
+                events:{
+                    click(){
+                        const formData = getFormCache();
+                        const formDateList = getCacheData('formDateList') || [];
+                        const findItem =  formDateList.find(i => i.recordDate === formData.recordDate);
+                        if(!findItem) {
+                            alert('缓存中并没有改日期的数据，请到新增数据中提交');
+                            return;
+                        }
+                        Object.keys(formData).forEach(key => {
+                            findItem[key] = formData[key];
+                        })
+                        // 清除缓存
+                        setFormCache();
+                        // 更新物料列表数据到缓存中
+                        setCacheData('formDateList',formDateList);
+                        alert('已提交')
+                        location.reload();
+                    }
+                }
+            }]
         }
-        function setExtraData(label,index,data) {
-            Object.keys(data).forEach(key => {
-                viewData[label][index][key] = data[key]
-            })
+    })
+}
+// 表单：查看模块
+const viewDataAction = (node) => {
+    function waitChartLoad(){
+        return new Promise(resolve => {
+            const timer = setInterval(()=> {
+                clearInterval(timer);
+                resolve();
+            },100)
+        })
+    }
+    waitChartLoad().then(()=> {
+        if(!Chart.registry.plugins.datalabels){
+            Chart.register(ChartDataLabels);
         }
-        formDateList.forEach((item,index) => {
-            ['purchase','repo','system'].forEach(key => {
-                getBaseData(item,index,key)
+        updateFormDateList();
+        const formDateList = getCacheData('formDateList') || [];
+        if(formDateList.length) {
+            function getDayDistance(day1,day2) {
+                const leftDate = new Date(day1);
+                const rightDate = new Date(day2);
+                const millisecondsDiff = leftDate - rightDate;
+                const daysDiff = Math.round(millisecondsDiff / (1000 * 60 * 60 * 24));
+                return daysDiff;
+            }
+            // 生成日消耗/周消耗/出仓建议
+            const viewData = {};
+            materialsList.forEach(item => {
+                if(!viewData[item.label]) {
+                    viewData[item.label] = [];
+                }
             })
-            if(index === 0) {
-                item.system.forEach(_i => {
+            function setBaseData(item,index,field){
+                item[field].forEach(_item => {
+                    let _itemData = viewData[_item.label][index];
+                    if(!_itemData) {
+                        _itemData = {};
+                        viewData[_item.label].push(_itemData)
+                    }
+                    _itemData[field] = _item.total
+                })
+            }
+            function setExtraData(label,index,data) {
+                Object.keys(data).forEach(key => {
+                    viewData[label][index][key] = data[key]
+                })
+            }
+            formDateList.forEach((item,index) => {
+                recordTypes.forEach(i => {
+                    setBaseData(item,index,i.field)
+                })
+                if(index === 0) {
+                    materialsList.forEach(_i => {
+                        setExtraData(_i.label,index,{
+                            dayUse:0,
+                            weekUse:0,
+                            outSuggest:0,
+                            recordDate:item.recordDate
+                        })
+                    })
+                    return;
+                }
+                const lastRecoedData = formDateList[index -1];
+                const dayDistance = getDayDistance(item.recordDate,lastRecoedData.recordDate);
+                materialsList.forEach((_i) => {
+                    const viewItemData = viewData[_i.label][index];
+                    const lastViewItemData = viewData[_i.label][index - 1];
+                    const useNum = lastViewItemData.repo + viewItemData.purchase - viewItemData.repo;
+                    const dayUse = parseInt(useNum / dayDistance);
+                    let outSuggest = 0;
+                    let outSuggestText = ''
+                    const averageMoreOut = parseInt((viewItemData.system - viewItemData.repo) / 30);
+                    if(viewItemData.system > viewItemData.repo) {
+                        if(averageMoreOut > dayUse) {
+                            outSuggest = dayUse * 2;
+                            outSuggestText = `系统(${viewItemData.system})远大于仓库(${viewItemData.repo}):日耗(${dayUse}) * 2`
+                        } else {
+                            outSuggest = dayUse + averageMoreOut;
+                            outSuggestText = `系统(${viewItemData.system})大于仓库(${viewItemData.repo}):日耗(${dayUse}) + 多出(${averageMoreOut})`
+                        }
+                    } else if(viewItemData.system < viewItemData.repo) {
+                        if(averageMoreOut + dayUse < 0) {
+                            outSuggest = 0;
+                            outSuggestText = `系统(${viewItemData.system})远少于仓库(${viewItemData.repo}):建议不出`
+                        } else {
+                            outSuggest = dayUse + averageMoreOut;
+                            outSuggestText = `系统(${viewItemData.system})少于仓库(${viewItemData.repo}):日耗${dayUse} - 少出(${Math.abs(averageMoreOut)})`
+                        }
+                    } else {
+                        outSuggest = dayUse;
+                        outSuggestText = `正常出库:日耗(${dayUse})`
+                    }
                     setExtraData(_i.label,index,{
-                        dayUse:0,
-                        weekUse:0,
-                        outSuggest:0,
+                        dayUse: dayUse,
+                        weekUse:dayUse * 7,
+                        outSuggest,
+                        outSuggestText,
                         recordDate:item.recordDate
                     })
                 })
-                return;
-            }
-            const lastRecoedData = formDateList[index -1];
-            const dayDistance = getDayDistance(item.recordDate,lastRecoedData.recordDate);
-            item.system.forEach((_i) => {
-                const viewItemData = viewData[_i.label][index];
-                const lastViewItemData = viewData[_i.label][index - 1];
-                const useNum = lastViewItemData.repo + viewItemData.purchase - viewItemData.repo;
-                const dayUse = parseInt(useNum / dayDistance);
-                let outSuggest = 0;
-                if(viewItemData.system > viewItemData.repo) {
-                    outSuggest = dayUse + parseInt((viewItemData.system - viewItemData.repo) / 30);
-                }
-                setExtraData(_i.label,index,{
-                    dayUse: dayUse,
-                    weekUse:dayUse * 7,
-                    outSuggest,
-                    recordDate:item.recordDate
-                })
             })
-        })
-        const viewNode = createElement({
-            tagName:'div',
-            className:'view-wrapper',
-            childs:[
-                {
-                    tagName:'div',
-                    className:'view-select-wrapper',
-                    childs:[
-                        {
-                            tagName:'label',
-                            innerText:'选择图表类型',
-                        },
-                        {
-                            tagName:'select',
-                            className:'view-select',
-                            events:{
-                                change(e){
-                                    renderView(e.target.value)
-                                }
+            const viewNode = createElement({
+                tagName:'div',
+                className:'view-wrapper',
+                childs:[
+                    {
+                        tagName:'div',
+                        className:'view-select-wrapper',
+                        childs:[
+                            {
+                                tagName:'label',
+                                innerText:'选择图表类型',
                             },
-                            childs:[
-                                {
-                                    tagName:'option',
-                                    attributes:{
-                                        value:'all',
-                                    },
-                                    innerText:'全部'
-                                },{
-                                    tagName:'option',
-                                    attributes:{
-                                        value:'currentNum',
-                                    },
-                                    innerText:'当前数量'
+                            {
+                                tagName:'select',
+                                className:'view-select',
+                                events:{
+                                    change(e){
+                                        renderView(e.target.value)
+                                    }
                                 },
-                                {
-                                    tagName:'option',
-                                    attributes:{
-                                        value:'out',
-                                        selected:"selected"
+                                childs:[
+                                    {
+                                        tagName:'option',
+                                        attributes:{
+                                            value:'all',
+                                        },
+                                        innerText:'全部'
+                                    },{
+                                        tagName:'option',
+                                        attributes:{
+                                            value:'currentNum',
+                                        },
+                                        innerText:'当前数量'
                                     },
-                                    innerText:'出库'
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    tagName:'div',
-                    className:'view-content'
-                }
-            ]
-        },node)
-        function renderView(type){
-            // 重新渲染图表
-            const viewContentNode = viewNode.querySelector('.view-content');
-            while(viewContentNode.firstChild) {
-                viewContentNode.removeChild(viewContentNode.firstChild);
-            }
-            materialsList.forEach(item => {
-                const viewItemNode = createElement({
-                    tagName:'div',
-                    className:'view-item',
-                    childs:[
-                        {
-                            tagName:'div',
-                            className:'view-item-title',
-                            innerText:item.label
-                        },
-                        {
-                            tagName:'canvas',
-                            className:'view-item-canvas',
-                            attributes:{
-                                width:'200',
-                                height:'200',
+                                    {
+                                        tagName:'option',
+                                        attributes:{
+                                            value:'useNum',
+                                        },
+                                        innerText:'消耗量'
+                                    },
+                                    {
+                                        tagName:'option',
+                                        attributes:{
+                                            value:'out',
+                                            selected:"selected"
+                                        },
+                                        innerText:'出库'
+                                    }
+                                ]
                             }
-                        }
-                    ]
-                },viewContentNode);
-                const viewLabelList = viewData[item.label];
-                const fieldMap = {
-                    purchase:'购买',
-                    repo:'仓库',
-                    system:'系统',
-                    dayUse:'日耗',
-                    weekUse:'周耗',
-                    outSuggest:'出仓建议'
-                }
-                const typeMapDataSets = {
-                    all:['purchase','repo','system','dayUse','weekUse','outSuggest'],
-                    currentNum:['repo','system'],
-                    out:['dayUse','outSuggest']
-                }
-                new Chart(viewItemNode.querySelector('canvas').getContext('2d'), {
-                    type:'line',
-                    data:{
-                        labels:viewLabelList.map(i => i.recordDate),
-                        datasets:typeMapDataSets[type].map(key => ({
-                            label:fieldMap[key],
-                            data:viewLabelList.map(i => i[key]),
-                            datalabels: {
-                                anchor: 'end',
-                                align: 'end',
-                                formatter: (value) => value // 显示数据值
-                            }
-                        }))
+                        ]
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'top',
+                    {
+                        tagName:'div',
+                        className:'view-content'
+                    }
+                ]
+            },node)
+            function renderView(type){
+                // 重新渲染图表
+                const viewContentNode = viewNode.querySelector('.view-content');
+                while(viewContentNode.firstChild) {
+                    viewContentNode.removeChild(viewContentNode.firstChild);
+                }
+                materialsList.forEach(item => {
+                    const outSuggestNodeConfig =  formDateList.length > 1 && type === 'out' ? [{
+                        tagName:'div',
+                        className:'view-item-out-suggest',
+                        childs:viewData[item.label].toReversed().map((i,_index) => {
+                            if(_index === viewData[item.label].length -1) return;
+                            if(_index > 2) return; // 只显示三个，避免显示太多
+                            return {
+                                tagName:'div',
+                                className:'view-item-out-suggest-item',
+                                childs:[
+                                    {
+                                        tagName:'div',
+                                        innerText:i.recordDate,
+                                    },
+                                    {
+                                        tagName:'span',
+                                        innerText:i.outSuggestText,
+                                        style:{
+                                            color:'#999'
+                                        }
+                                    },{
+                                        tagName:'span',
+                                        style:{
+                                            color:'red',
+                                            fontWeight:'bold',
+                                            fontSize:'14px'
+                                        },
+                                        innerText:` = ${i.outSuggest}`
+                                    }
+                                ]
+                            }
+                        }).filter(Boolean)
+                    }] : [];
+                    const viewItemNode = createElement({
+                        tagName:'div',
+                        className:'view-item',
+                        childs:[
+                            {
+                                tagName:'div',
+                                className:'view-item-title',
+                                innerText:item.label
                             },
-                            datalabels: {
-                                color: '#315efb', // 数据标签颜色
-                                font: {
-                                    weight: 'bold',
-                                    size: 14,
+                            {
+                                tagName:'div',
+                                className:'canvas-wrapper',
+                                style:{
+                                    width:'100vw',
+                                    height:'80vw',
+                                },
+                                childs:[{
+                                    tagName:'canvas',
+                                    className:'view-item-canvas',
+                                    style:{
+                                        width:'100%',
+                                        height:'100%'
+                                    }
+                                }]
+                            },
+                            {
+                                tagName:'div',
+                                className:'view-item-specs',
+                                innerText:item.specs.map((i,index) => {
+                                    if(i.spec) {
+                                        if(index === 0) {
+                                            return `1${i.unit}*${i.spec}${item.specs[index + 1].unit}` 
+                                        } else {
+                                            return `${i.spec}${item.specs[index + 1].unit}`
+                                        } 
+                                    } else {
+                                        return ''
+                                    }
+                                }).filter(Boolean).join('*')
+                            },
+                            ...outSuggestNodeConfig
+                        ]
+                    },viewContentNode);
+                    const viewLabelList = viewData[item.label];
+                    const fieldMap = {
+                        purchase:'购买',
+                        repo:'仓库',
+                        system:'系统',
+                        dayUse:'日耗',
+                        weekUse:'周耗',
+                        outSuggest:'出仓建议'
+                    }
+                    const typeMapDataSets = {
+                        all:['purchase','repo','system','dayUse','weekUse','outSuggest'],
+                        currentNum:['repo','system','purchase'],
+                        useNum:['dayUse','weekUse'],
+                        out:['dayUse','outSuggest']
+                    }
+                    new Chart(viewItemNode.querySelector('canvas').getContext('2d'), {
+                        type:'line',
+                        data:{
+                            labels:viewLabelList.map(i => i.recordDate),
+                            datasets:typeMapDataSets[type].map(key => ({
+                                label:fieldMap[key],
+                                data:viewLabelList.map(i => i[key]),
+                                datalabels: {
+                                    anchor: 'end',
+                                    align: 'end',
+                                    formatter: (value) => {
+                                        if(value > 0) {
+                                            const specs = item.specs || [];
+                                            const valueFormatList = [];
+                                            specs.toReversed().forEach((_i,_index) => {
+                                                if(_i.spec) {
+                                                    value = value / _i.spec;
+                                                }
+                                                if(value < 0.1) return; // 数值太小就不显示了
+                                                let text = `${Math.round(value * 100) / 100}${_i.unit}`;
+                                                if(_index !== 0) {
+                                                    text = `(${text})`
+                                                }
+                                                valueFormatList.push(text)
+                                            })
+                                            return valueFormatList.join('')
+                                        } else {
+                                            return value;
+                                        }
+                                    }
+                                }
+                            }))
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                datalabels: {
+                                    color: '#315efb', // 数据标签颜色
+                                    font: {
+                                        size: 12,
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
                                 }
                             }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
                         }
-                    }
+                    })
                 })
-            })
-        }
-        renderView('out');
-    }
+            }
+            renderView('out');
+        } else {
+            createElement({
+                tagName:'div',
+                innerText:'无数据信息，先增加数据',
+                style:{
+                    lineHeight:'100px',
+                    textAlign:'center',
+                    fontSize:'16px',
+                    color:"#666"
+                }
+            },node);
+        }  
+    })
 }
-// 导入导出模块
-const inOutAction = (node) => {
+// 表单：导入导出模块
+const inOutDataAction = (node) => {
     const jsonId = '仓库物料'
     function downloadJSON() {
         // 将数据转换为JSON字符串
@@ -557,11 +871,6 @@ const inOutAction = (node) => {
             innerText:'导入',
             attributes:{
                 for:'inOutInput'
-            },
-            events:{
-                click(){
-
-                }
             }
         },{
             tagName:'div',
@@ -575,12 +884,15 @@ const inOutAction = (node) => {
         }]
     },node)
 }
-const fireAction = (node,type) => {
+
+// 触发对应模块逻辑
+const fireAction = (type,node) => {
     const actionMap = {
-        input:inputAction,
-        view:viewAction,
-        inOutData:inOutAction
+        newData:newDataAction,
+        modifyData:modifyDataAction,
+        viewData:viewDataAction,
+        inOutData:inOutDataAction
     }
-    actionMap[type](node)
+    actionMap[type](node);
 }
 window.fireAction = fireAction;
