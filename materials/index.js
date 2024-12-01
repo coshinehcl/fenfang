@@ -212,6 +212,117 @@ const createFormBlockNode = (formData,field,config) => {
         },formBlockContentNode)
     })
 }
+// 照片
+const createPictureNode = (node,setFormCache,getFormCache)=>{
+    const formData = getFormCache();
+    const formBlockNode = createElement({
+        tagName:'div',
+        className:`form-block pictures`,
+        childs:[
+            {
+                tagName:'div',
+                className:'form-block-title',
+                innerText:'照片'
+            },
+            {
+                tagName:'div',
+                className:'form-block-content',
+                childs:[{
+                    tagName:'div',
+                    className:'form-block-content-item item',
+                }]
+            }
+        ]
+    },node);
+    const picturesNode = formBlockNode.querySelector('.form-block-content-item');
+    const createPictureNode = (item,index) => {
+        return {
+            tagName:'div',
+            className:'picture-item',
+            childs:[
+                {
+                    tagName:'label',
+                    attributes:{
+                        for:`picture_id_${index}`
+                    }
+                },{
+                    tagName:'input',
+                    attributes:{
+                        id:`picture_id_${index}`,
+                        type:'file',
+                        accept:'image/*',
+                        capture:"environment"
+                    },
+                    events:{
+                        change(event){
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader(); // 创建 FileReader 对象
+                                reader.onload = function(e) {
+                                    const previewNode = event.target.parentNode.querySelector('.picture-preview');
+                                    previewNode.src = e.target.result; // 设置预览图像的 src
+                                    previewNode.parentNode.style.display = 'flex';
+                                    const formData = getFormCache()
+                                    formData.pictures[index].src = previewNode.src;
+                                    setFormCache(formData);
+                                };
+                                reader.readAsDataURL(file); // 读取文件并触发 onload 事件
+                            }
+                        }
+                    },
+                    style:{
+                        display:'none'
+                    }
+                },{
+                    tagName:'div',
+                    className:'picture-preview-wrapper',
+                    style:{
+                        display:item.src ? 'flex' : 'none'
+                    },
+                    childs:[
+                        {
+                            tagName:'img',
+                            className:'picture-preview',
+                            attributes:{
+                                src:item.src
+                            }
+                        },{
+                            tagName:'span',
+                            className:'picture-delete-btn',
+                            innerText:'x',
+                            events:{
+                                click(){
+                                    const formData = getFormCache()
+                                    formData.pictures[index].src = '';
+                                    setFormCache(formData);
+                                    renderPicture();
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    function renderPicture(){
+        const formData = getFormCache();
+        while(picturesNode.firstChild) {
+            picturesNode.removeChild(picturesNode.firstChild);
+        }
+        if(!formData.pictures) {
+            formData.pictures = new Array(10).fill({src:''});
+            setFormCache(formData);
+        }
+        createElement({
+            tagName:'div',
+            className:'pictures-wrapper',
+            childs:formData.pictures.map((i,index) => {
+                return createPictureNode(i,index);
+            })
+        },picturesNode)
+    }
+    renderPicture();
+}
 const formCommon = (node,config) => {
     const { formType,initCacheData,createDateNode,createSubmitNodes } = config;
     const formCacheKey = `${formType}Cache`;
@@ -256,6 +367,7 @@ const formCommon = (node,config) => {
             formContentNode.removeChild(formContentNode.firstChild);
         }
         if(!formData.recordDate) return;
+        // 物料列表
         recordTypes.forEach(recordTypeItem => {
             createFormBlockNode(formData,recordTypeItem.field,{
                 node:formContentNode,
@@ -264,6 +376,8 @@ const formCommon = (node,config) => {
                 setFormCache
             });
         })
+        // 照片
+        createPictureNode(formContentNode,setFormCache,getFormCache)
         createElement({
             tagName:'div',
             className:'form-submit',
@@ -584,7 +698,7 @@ const viewDataAction = (node) => {
                         childs:[
                             {
                                 tagName:'label',
-                                innerText:'选择图表类型',
+                                innerText:'选择图表',
                             },
                             {
                                 tagName:'select',
@@ -624,6 +738,25 @@ const viewDataAction = (node) => {
                                         innerText:'出库'
                                     }
                                 ]
+                            },
+                            {
+                                tagName:'select',
+                                className:'view-select',
+                                events:{
+                                    change(e){
+                                       const targetNode = node.querySelector(`.view-item[data-title="${e.target.value}"]`);
+                                       if(targetNode) {
+                                            targetNode.scrollIntoView();
+                                       }
+                                    }
+                                },
+                                childs:materialsList.map(i => ({
+                                    tagName:'option',
+                                    attributes:{
+                                        value:i.label,
+                                    },
+                                    innerText:i.label
+                                }))
                             }
                         ]
                     },
@@ -676,11 +809,19 @@ const viewDataAction = (node) => {
                     const viewItemNode = createElement({
                         tagName:'div',
                         className:'view-item',
+                        attributes:{
+                            'data-title':item.label
+                        },
                         childs:[
                             {
                                 tagName:'div',
                                 className:'view-item-title',
-                                innerText:item.label
+                                innerText:item.label,
+                                events:{
+                                    click(){
+                                       node.scrollIntoView() 
+                                    }
+                                }
                             },
                             {
                                 tagName:'div',

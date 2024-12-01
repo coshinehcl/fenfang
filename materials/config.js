@@ -156,6 +156,18 @@ export const materialsList = [
         ]
     },
     {
+        label:'凤生面巾纸',
+        specs:[
+            {
+                unit:'箱',
+                spec:60
+            },
+            {
+                unit:'包',
+            }
+        ]
+    },
+    {
         label:'儿童真美布拖鞋',
         specs:[
             {
@@ -176,6 +188,22 @@ export const materialsList = [
             },
             {
                 unit:'支'
+            }
+        ]
+    },
+    {
+        label:'凤生卷',
+        specs:[
+            {
+                unit:'箱',
+                spec:10
+            },
+            {
+                unit:'提',
+                spec:12
+            },
+            {
+                unit:'卷',
             }
         ]
     },

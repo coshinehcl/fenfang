@@ -114,6 +114,57 @@
             border-radius: 20px;
             margin:10px;
         }
+        .form-wrapper .pictures-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .form-wrapper .picture-item{
+            width: calc(50% - 10px);
+            height: 200px;
+            position: relative;
+            border:1px solid #999;
+            border-radius: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .form-wrapper .picture-item label {
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .form-wrapper .picture-item label::before {
+            content:'+';
+            font-size: 60px;
+            color:#999;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+        .form-wrapper .picture-item .picture-preview-wrapper {
+            position: absolute;
+            top:0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            background-color: #fff;
+            align-items: center;
+        }
+        .form-wrapper .picture-item .picture-preview-wrapper img {
+            width: 100%;
+            height: auto;
+        }
+        .form-wrapper .picture-item .picture-delete-btn {
+            position: absolute;
+            top:0;
+            right:4px;
+            font-size: 24px;
+            line-height: 1;
+        }
     </style>
     <style>
         .view-select-wrapper {
