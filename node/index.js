@@ -38,6 +38,6 @@ const server = http.createServer((req, res) => {
 });
 
 // 监听3000端口
-server.listen(3000, () => {
+server.listen(443, () => {
     console.log('Server is running on port 3000');
 });
