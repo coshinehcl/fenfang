@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>物料管理</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels" defer></script>
+    <script src="https://unpkg.com/write-excel-file@1.x/bundle/write-excel-file.min.js" defer></script>
+    <style>
+        html,body {
+            margin: 0;
+            padding: 0;
+            font-size: 16px;
+        }
+        body {
+            --fontSize:16px;
+            --margin:4px;
+            --padding:4px;
+            --itemMargin:10px;
+            --border:1px solid #999;
+            --borderRadius:4px;
+            --infoColor:#999;
+            --commonHeight:30px;
+            --linghtColor:#315efb;
+            --pageNavMaxHeight:30vh;
+        }
+        .action {
+            font-size: var(--fontSize);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-bottom: 1px solid #999;
+        }
+        .action-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin:10px 0;
+            border: 1px solid #999;
+            padding: 0 8px;
+            height: var(--commonHeight);
+            border-radius: 20px;
+        }
+        .action-item.active {
+            color:var(--linghtColor);
+            border-color:var(--linghtColor);
+        }
+        .action-content {
+            font-size: var(--fontSize);
+        }
+        .action-content > div {
+            margin-bottom: 20px;
+        }
+        .page-nav {
+            display: none;
+        }
+        .page-nav:has(.nav-item) {
+            position: fixed;
+            bottom: 20px;
+            right: 4px;
+            display: block;
+            background-color: white;
+            padding:0 10px;
+            text-align: center;
+            border:1px solid var(--infoColor);
+            border-radius: 4px;
+            max-height: var(--pageNavMaxHeight);
+            overflow-y: scroll;
+        }
+        .page-nav .nav-item {
+            margin: 2px 0;
+            font-size: 14px;
+        }
+    </style>
+    <style>
+        .form-content-wrapper .form-date-wrapper {
+            margin: 4px;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form-content-wrapper .form-date-wrapper .form-date {
+            margin-left: 10px;
+            padding: 0;
+            padding-inline-start:10px;
+            padding-inline-end: 10px;
+            border-radius: 10000px;
+            font-size: var(--fontSize);
+            height: calc(var(--commonHeight) + 2px);
+            outline: none;
+            border:1px solid #999;
+            width: 40vw;
+            box-sizing: border-box;
+        }
+        .form-belong-title,.form-pictures-title{
+            text-align: center;
+            color:var(--linghtColor);
+        }
+        .form-pictures-content {
+            margin: 4px;
+            padding: 4px;
+            display: flex;
+            box-sizing: content-box;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .form-pictures-content my-picture {
+            margin-top: 4px;
+            width: calc(50% - 2px);
+            aspect-ratio: 1 / 1;
+        }
+        .form-submit-wrapper {
+            border-top: 1px solid var(--infoColor);
+            padding:20px 0;
+            display: flex;
+            justify-content: center;
+        }
+        .form-submit-wrapper .form-submit-item {
+            width: 33vw;
+            margin:0 4px;
+            height: calc(var(--commonHeight) * 1.2);
+            border:1px solid var(--infoColor);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10000px;
+        }
+    </style>
+    <style>
+        .chart-wrapper {
+            padding-bottom: var(--pageNavMaxHeight);
+        }
+        .chart-select-wrapper {
+            margin:var(--margin);
+            padding:var(--padding);
+            border:var(--border);
+            border-radius: var(--borderRadius);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chart-select-wrapper .chart-select {
+            margin-left: 10px;
+            padding: 0;
+            padding-inline-start:10px;
+            padding-inline-end: 10px;
+            border-radius: 10000px;
+            font-size: var(--fontSize);
+            height: calc(var(--commonHeight) + 2px);
+            outline: none;
+            border:1px solid #999;
+            width: 40vw;
+            box-sizing: border-box;
+        }
+        .chart-item {
+            margin:var(--margin);
+            padding:var(--padding);
+            border:var(--border);
+            border-radius: var(--borderRadius);
+        }
+        .chart-item-title {
+            text-align: center;
+            color:var(--linghtColor)
+        }
+    </style>
+    <style>
+        .in-out-block {
+            margin-top: 100px;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+        }
+        .in-out-btn {
+            margin-top: 20px;
+            display: inline-block;
+            width: 40vw;
+            border:1px solid #999;
+            border-radius: 10000px;
+            height: var(--commonHeight);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="action">
+        <div class="action-item" data-type="newData">新增数据</div>
+        <div class="action-item" data-type="modifyData">修改数据</div>
+        <div class="action-item" data-type="viewData">查看数据</div>
+        <div class="action-item" data-type="inOutData">导入导出数据</div>
+    </div>
+    <div class="action-content"></div>
+    <div class="page-nav">
+    </div>
+</body>
+<script src="./dist/index.js"></script>
+</html>

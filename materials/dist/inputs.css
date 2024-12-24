@@ -1,0 +1,90 @@
+/* components/inputs/index.less */
+.wrapper {
+  margin: var(--margin);
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--borderRadius);
+  font-size: var(--fontSize);
+  position: relative;
+}
+.wrapper::before {
+  content: attr(data-belong);
+  position: absolute;
+  top: 0;
+  right: 4px;
+  font-size: 12px;
+  color: rgba(153, 153, 153, 0.4);
+}
+.wrapper .title {
+  text-align: center;
+  font-size: calc(var(--fontSize) - 1px);
+}
+.wrapper .list-wrapper .item-wrapper {
+  position: relative;
+}
+.wrapper .list-wrapper .item-wrapper .item-title {
+  font-size: calc(var(--fontSize) - 2px);
+  font-weight: bold;
+}
+.wrapper .list-wrapper .item-wrapper .item-inputs {
+  display: flex;
+  margin-top: 5px;
+  align-items: center;
+}
+.wrapper .list-wrapper .item-wrapper .item-inputs .input-wrapper {
+  width: 33.3%;
+  display: flex;
+  align-items: center;
+  border: 1px solid #999;
+  border-radius: 10000px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0 10px;
+}
+.wrapper .list-wrapper .item-wrapper .item-inputs .input-wrapper span {
+  display: inline-block;
+  width: 20px;
+  font-size: 12px;
+  color: var(--infoColor);
+  text-align: center;
+}
+.wrapper .list-wrapper .item-wrapper .item-inputs .input-wrapper input {
+  width: calc(100% - 20px);
+  font-size: var(--fontSize);
+  padding: 0;
+  border: none;
+  outline: none;
+  height: calc(var(--commonHeight) - 2px);
+}
+.wrapper .list-wrapper .item-wrapper .item-total {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--infoColor);
+}
+.wrapper .list-wrapper .item-wrapper .item-total strong {
+  font-weight: bold;
+  color: #333;
+}
+.wrapper .list-wrapper .item-wrapper ~ .item-wrapper {
+  margin-top: 5px;
+  padding-top: 5px;
+}
+.wrapper .list-wrapper .item-wrapper ~ .item-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 25%;
+  width: 50%;
+  border-top: 1px solid rgba(153, 153, 153, 0.2);
+}
+.wrapper .list-total {
+  margin-top: var(--margin);
+  padding-top: var(--padding);
+  font-size: 12px;
+  border-top: var(--border);
+  color: var(--infoColor);
+}
+.wrapper .list-total strong {
+  font-weight: bold;
+  color: #333;
+}

@@ -1,0 +1,92 @@
+.wrapper {
+    margin:var(--margin);
+    padding:var(--padding);
+    border:var(--border);
+    border-radius: var(--borderRadius);
+    font-size: var(--fontSize);
+    position: relative;
+    &::before {
+        content: attr(data-belong);
+        position: absolute;
+        top:0;
+        right:4px;
+        font-size: 12px;
+        color:rgba(153, 153, 153, 0.4);
+    }
+    .title {
+        text-align: center;
+        font-size: calc(var(--fontSize) - 1px);
+    }
+    .list-wrapper {
+        .item-wrapper {
+            position: relative;;
+            .item-title {
+                font-size: calc(var(--fontSize) - 2px);
+                font-weight: bold;
+            }
+            .item-inputs {
+                display: flex;
+                margin-top:5px;
+                align-items: center;
+                .input-wrapper {
+                    width: 33.3%;
+                    display: flex;
+                    align-items: center;
+                    border:1px solid #999;
+                    border-radius: 10000px;
+                    box-sizing: border-box;
+                    overflow: hidden;
+                    padding: 0 10px;
+                    span {
+                        display: inline-block;
+                        width: 20px;  
+                        font-size: 12px;
+                        color:var(--infoColor);
+                        text-align: center;
+                    }
+                    input {
+                        width: calc(100% - 20px);
+                        font-size: var(--fontSize);
+                        padding:0;
+                        border: none;
+                        outline: none;
+                        height: calc(var(--commonHeight) - 2px);
+                    }
+                }
+            }
+            .item-total {
+                margin-top:5px;
+                font-size: 12px;
+                color:var(--infoColor);
+                strong {
+                    font-weight: bold;
+                    color:#333;
+                }
+            }
+            & ~ .item-wrapper {
+                margin-top: 5px;
+                padding-top: 5px;
+            }
+            & ~ .item-wrapper::before {
+                content: '';
+                position: absolute;
+                top:0;
+                left:25%;
+                width:50%;
+                border-top:1px solid rgba(153, 153, 153, 0.2);
+            }
+        }
+    }
+    .list-total {
+        margin-top:var(--margin);
+        padding-top: var(--padding);
+        font-size: 12px;
+        border-top: var(--border);
+        color:var(--infoColor);
+        strong {
+            font-weight: bold;
+            color:#333;
+        }
+    }
+   
+}
