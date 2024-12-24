@@ -1361,14 +1361,18 @@
     };
     const chartSelectOptions = [
       {
-        label: "\u4ED3\u5E93\u7CFB\u7EDF",
+        label: "\u6570\u91CF\u5BF9\u6BD4",
         list: ["system", "repo"],
-        footer: []
+        footer: [(item) => {
+          return `\u7CFB\u7EDF${item.system},\u4ED3\u5E93${item.repo},\u76F8\u5DEE<strong>${getFormatNum(item.system - item.repo)}</strong>`;
+        }]
       },
       {
-        label: "\u6D88\u8017",
+        label: "\u6D88\u8017\u5BF9\u6BD4",
         list: ["dayUse", "averageDayUse"],
-        footer: []
+        footer: [(item) => {
+          return `\u65E5\u8017${item.dayUse},\u5747\u65E5\u8017<strong>${item.availableDay}</strong>`;
+        }]
       },
       {
         label: "\u51FA\u5E93\u5EFA\u8BAE",
@@ -1665,25 +1669,33 @@
           return params.footer.map((field) => ({
             tagName: "div",
             className: "item-type-wrapper",
-            childs: showArr.map((i) => ({
-              tagName: "div",
-              className: "item",
-              style: {
-                display: i[field] ? "block" : "none"
-              },
-              childs: [
-                {
-                  tagName: "div",
-                  className: "item-record-date",
-                  innerText: i.recordDate
+            childs: showArr.map((i) => {
+              let v;
+              if (typeof field === "function") {
+                v = field(i);
+              } else {
+                v = i[field];
+              }
+              return {
+                tagName: "div",
+                className: "item",
+                style: {
+                  display: v ? "block" : "none"
                 },
-                {
-                  tagName: "div",
-                  className: "item-content",
-                  innerHTML: i[field]
-                }
-              ]
-            }))
+                childs: [
+                  {
+                    tagName: "div",
+                    className: "item-record-date",
+                    innerText: i.recordDate
+                  },
+                  {
+                    tagName: "div",
+                    className: "item-content",
+                    innerHTML: v
+                  }
+                ]
+              };
+            })
           }));
         }
         const canvasItemWrapper = {

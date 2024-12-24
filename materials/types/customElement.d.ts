@@ -30,6 +30,7 @@ interface ChartItemRenderDataItem extends ChartItemRenderDataBasicItemCommon {
 export type ChartItemRenderDataItemLike = ChartItemRenderDataItem & {label:string}
 export type ChartLabelFields = GetKeysByType<ChartItemRenderDataItem,number | '-'>
 export type ChartFooterFields = Exclude<GetKeysByType<ChartItemRenderDataItem,string>,'recordDate'>
+export type ChartFooterItem = ChartFooterFields | ((item:ChartItemRenderDataItemLike)=> string)
 
 interface ChartItemRenderData<T> {
     renderData:{
@@ -70,7 +71,7 @@ export interface CustomElementInitMap {
             /** chart的datasets的label */
             datasetsLabels:Array<ChartLabelFields>,
             /** 图表底部要处理的item字段数组 */
-            footer:Array<ChartFooterFields>,
+            footer:Array<ChartFooterItem>,
             /** label的映射 */
             datasetsLabelsMap:{
                 [k in ChartLabelFields]:string

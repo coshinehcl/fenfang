@@ -98,25 +98,33 @@ export const myCharts:ComponentsExport<'my-charts'> = {
                 return params.footer.map(field => ({
                     tagName:'div',
                     className:'item-type-wrapper',
-                    childs:showArr.map(i => ({
-                        tagName:'div',
-                        className:'item',
-                        style:{
-                            display:i[field] ? 'block' : 'none'
-                        },
-                        childs:[
-                            {
-                                tagName:'div',
-                                className:'item-record-date',
-                                innerText:i.recordDate
+                    childs:showArr.map(i => {
+                        let v;
+                        if(typeof field === 'function') {
+                            v = field(i);
+                        } else {
+                            v = i[field]
+                        }
+                        return {
+                            tagName:'div',
+                            className:'item',
+                            style:{
+                                display:v ? 'block' : 'none'
                             },
-                            {
-                                tagName:'div',
-                                className:'item-content',
-                                innerHTML:i[field]
-                            }
-                        ]
-                    }))
+                            childs:[
+                                {
+                                    tagName:'div',
+                                    className:'item-record-date',
+                                    innerText:i.recordDate
+                                },
+                                {
+                                    tagName:'div',
+                                    className:'item-content',
+                                    innerHTML:v
+                                }
+                            ]
+                        }
+                    })
                 }))
             }
             const canvasItemWrapper:CreateElementConfig = {

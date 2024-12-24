@@ -1,4 +1,4 @@
-import { ActionHandler,ChartItemRenderDataItemLike,ChartLabelFields,ChartItemBasic,ChartItemBasicAndRenderBasic,ChartItem,GetArrayType,RecordBelongsFields, CreateElementConfig,ChartFooterFields } from '@types'
+import { ActionHandler,ChartItemRenderDataItemLike,ChartLabelFields,ChartItemBasic,ChartItemBasicAndRenderBasic,ChartItem,GetArrayType,RecordBelongsFields, CreateElementConfig,ChartFooterItem } from '@types'
 import { getRecordList,cloneData, waitCondition, createElement, createCustomElement, removeChilds, getRecordBrandItemTotalInfo, getDayDistance, getFormatNum, getCurrentDate,formatSpecNum } from '@utils'
 import { materialsList } from '@config/materialsList'
 import { recordItemBelongs } from '@config/recordList'
@@ -325,17 +325,21 @@ export const viewData:ActionHandler = async (parentNode,params) => {
     const chartSelectOptions:Array<{
         label:string,
         list:Array<ChartLabelFields>,
-        footer:Array<ChartFooterFields>
+        footer:Array<ChartFooterItem>
     }> = [
         {
-            label:'仓库系统',
+            label:'数量对比',
             list:['system','repo'],
-            footer:[]
+            footer:[(item) => {
+                return `系统${item.system},仓库${item.repo},相差<strong>${getFormatNum(item.system - item.repo)}</strong>`
+            }]
         },
         {
-            label:'消耗',
+            label:'消耗对比',
             list:['dayUse','averageDayUse'],
-            footer:[]
+            footer:[(item) => {
+                return `日耗${item.dayUse},均日耗<strong>${item.availableDay}</strong>`
+            }]
         },
         {
             label:'出库建议',
