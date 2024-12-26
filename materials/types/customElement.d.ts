@@ -1,5 +1,5 @@
 import { RecordMaterialItemBrandItem,RecordMaterialItem,RecordBelongsFields,MaterialsItem,RecordBelongsFields,RecordItem,ComponentsExport,GetKeysByType } from '@types'
-export type CustomElementTags = 'my-inputs' | 'my-charts'
+export type CustomElementTags = 'my-inputs' | 'my-charts' | 'my-material-item'
 
 interface ChartItemRecordItem extends Record<RecordBelongsFields,RecordMaterialItem> {
     recordDate:RecordItem['recordDate'],
@@ -39,7 +39,8 @@ interface ChartItemRenderData<T> {
         }>,
         brandList:Array<Array<T & {
             label:RecordMaterialItemBrandItem['label'],
-            priority:RecordMaterialItemBrandItem['priority']
+            priority:RecordMaterialItemBrandItem['priority'],
+            isDeprecated:RecordMaterialItemBrandItem['isDeprecated'],
         }>>
     }
 }
@@ -77,6 +78,10 @@ export interface CustomElementInitMap {
                 [k in ChartLabelFields]:string
             }
         }
+    },
+    'my-material-item':{
+        data:MaterialsItem,
+        params:{}
     }
 }
 

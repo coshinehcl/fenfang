@@ -8,6 +8,8 @@ type MaterialsItemUnits = MaterialsItemUnitsBig | MaterialsItemUnitsMiddle | Mat
 export interface BrandItem {
     /** 品牌名称 */
     label:string,
+    /** 系统中该数量为0，且后续不会进货，则标记为废弃：仓库如果有部分剩余，则统计到其他品牌中，被废弃的只是不会在界面中展示，其他地方还是需要的 */
+    isDeprecated?:boolean,
     /** 品牌规格 */
     specs:Array<{
         /** 单位 */

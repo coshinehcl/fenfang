@@ -3,4 +3,5 @@ import { modifyData } from './modifyData'
 import { viewData } from './viewData' 
 import { inOutData } from './inOutData' 
 import { init } from './init'
-init({newData,modifyData,viewData,inOutData})
+import { materialsManager } from './materialsManager'
+init({newData,modifyData,viewData,inOutData,materialsManager})

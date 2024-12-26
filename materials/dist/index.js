@@ -137,6 +137,7 @@
         }
       }
     }
+    console.log(config.tagName);
     customElements.define(config.tagName, myEle);
   }
   function createCustomElement(tagName, options, parentNode) {
@@ -624,9 +625,26 @@
       unit: "\u888B"
     }
   ];
+  var MaterialsListStorageKey = "materials_list";
+  var getNewMaterialsList = () => {
+    let list = localStorage.getItem(MaterialsListStorageKey);
+    if (list) {
+      try {
+        return JSON.parse(list);
+      } catch (err) {
+        return materialsList;
+      }
+    } else {
+      return materialsList;
+    }
+  };
+  var setNewMaterialsList = (list) => {
+    localStorage.setItem(MaterialsListStorageKey, JSON.stringify(list));
+  };
 
   // utils/recordData.ts
   var RecordListStorageKey = "materials_recordList";
+  var materialsList2 = getNewMaterialsList();
   var getRecordList = () => {
     const recordList = localStorage.getItem(RecordListStorageKey);
     if (recordList) {
@@ -662,7 +680,7 @@
     localStorage.removeItem(RecordListStorageKey);
   };
   function updateBelongRecordMaterialItemList(oldBelongRecordMaterialItemList) {
-    return cloneData(materialsList).map((i) => {
+    return cloneData(materialsList2).map((i) => {
       const oldMaterialItem = oldBelongRecordMaterialItemList ? oldBelongRecordMaterialItemList.find((x) => x.label === i.label) : void 0;
       const newList = i.list.map((_i) => {
         const oldMaterialItemBrandItem = oldMaterialItem ? oldMaterialItem.list.find((x) => x.label === _i.label) : void 0;
@@ -676,6 +694,7 @@
         return {
           label: _i.label,
           priority: _i.priority,
+          isDeprecated: _i.isDeprecated || false,
           numList: newNumList
         };
       });
@@ -767,7 +786,6 @@
   function getLastRecordItem(date) {
     const recordList = getRecordList();
     const currentDateNum = dateFullToNum(date);
-    let lastRecordDataIndex = -1;
     const beforeRecordList = recordList.filter((i) => {
       const recordDataNum = dateFullToNum(i.recordDate);
       return recordDataNum < currentDateNum;
@@ -1056,10 +1074,11 @@
   };
 
   // src/viewData.ts
+  var materialsList3 = getNewMaterialsList();
   function getChartItemBasicInfoList() {
     const recordList = getRecordList();
     const viewDataItemList = [];
-    materialsList.forEach((materialItem) => {
+    materialsList3.forEach((materialItem) => {
       viewDataItemList.push({
         label: materialItem.label,
         basicInof: {
@@ -1111,6 +1130,7 @@
                 recordDate: recordItem.recordDate,
                 label: recordBrandItem.label,
                 priority: recordBrandItem.priority,
+                isDeprecated: recordBrandItem.isDeprecated,
                 // 默认值，避免ts报错
                 ...defaultValueObj,
                 [belong.field]: getRecordBrandItemTotalInfo(recordBrandItem).total
@@ -1340,7 +1360,6 @@
     const chartItemBasicInfoList = getChartItemBasicInfoList();
     const chartItemBasicRenderDataList = getChartItemRenderDataBasicList(chartItemBasicInfoList);
     const chartItemList = getChartItemRenderDataComputedList(chartItemBasicRenderDataList);
-    console.log(chartItemList);
     await waitCondition(() => {
       return Chart !== void 0;
     });
@@ -1740,11 +1759,13 @@
         };
         childsCanvasList.push(canvasItemWrapper);
       }
-      if (renderData.brandList.length > 1) {
+      if (data.basicInof.brandList.length > 1) {
         generateCanvasElementConfig(renderData.materialItem);
       }
-      renderData.brandList.forEach((brandItemList, index) => {
-        generateCanvasElementConfig(brandItemList, data.basicInof.brandList[index].specs);
+      const renderBrandList = renderData.brandList.filter((i) => i[0].isDeprecated ? false : true);
+      renderBrandList.forEach((brandItemList, index) => {
+        const findBrand = data.basicInof.brandList.find((i) => i.label === brandItemList[0].label);
+        generateCanvasElementConfig(brandItemList, findBrand?.specs);
       });
       createElement({
         tagName: "div",
@@ -1789,7 +1810,7 @@
           {
             tagName: "div",
             className: "list-wrapper",
-            childs: data.list.map((brandItem) => {
+            childs: data.list.filter((brandItem) => !brandItem.isDeprecated).map((brandItem) => {
               const lastBrandItem = params.lastMaterialItem?.list.find((x) => x.label === brandItem.label);
               let lastBrandTextList = [];
               let lastBrandItemNum = 0;
@@ -1953,10 +1974,198 @@
     }
   };
 
+  // components/materialItem/index.ts
+  var myMaterialItem = {
+    tagName: "my-material-item",
+    createNode(shadowRoot, data, params) {
+      while (shadowRoot.firstChild) {
+        shadowRoot.removeChild(shadowRoot.firstChild);
+      }
+      createElement({
+        tagName: "link",
+        attributes: {
+          rel: "stylesheet",
+          href: "./dist/materialItem.css"
+        }
+      }, shadowRoot);
+      let wrapperNode;
+      function render() {
+        if (wrapperNode) {
+          shadowRoot.removeChild(wrapperNode);
+        }
+        wrapperNode = createElement({
+          tagName: "div",
+          className: "wrapper",
+          childs: [
+            {
+              tagName: "div",
+              className: "material-label",
+              innerText: data.label
+            },
+            {
+              tagName: "div",
+              className: "usage-wrapper",
+              childs: [
+                {
+                  tagName: "div",
+                  style: {
+                    paddingRight: "10px"
+                  },
+                  innerText: "\u51FA\u5E93\u8303\u56F4"
+                },
+                {
+                  tagName: "input",
+                  attributes: {
+                    value: data.uasge.min,
+                    type: "number"
+                  }
+                },
+                {
+                  tagName: "input",
+                  attributes: {
+                    value: data.uasge.max,
+                    type: "number"
+                  }
+                }
+              ]
+            },
+            {
+              tagName: "div",
+              className: "material-brands-wrapper",
+              childs: data.list.map((brandItem, brandIndex) => {
+                return {
+                  tagName: "div",
+                  className: "brand-item",
+                  childs: [
+                    {
+                      tagName: "div",
+                      className: "brand-label-wrapper",
+                      childs: [
+                        {
+                          tagName: "div",
+                          className: `brand-label ${brandItem.isDeprecated ? "deprecated" : ""}`,
+                          innerText: brandItem.label
+                        },
+                        {
+                          tagName: "div",
+                          className: "brand-remove",
+                          innerText: brandItem.isDeprecated ? "\u5E9F\u5F03" : "\u6FC0\u6D3B",
+                          events: {
+                            click(e) {
+                              brandItem.isDeprecated = !brandItem.isDeprecated;
+                              render();
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      tagName: "div",
+                      className: "brand-specs-wrapper",
+                      style: {
+                        display: brandItem.isDeprecated ? "none" : "block"
+                      },
+                      childs: brandItem.specs.map((specItem, specIndex) => {
+                        return {
+                          tagName: "div",
+                          className: "spec-wrapper",
+                          childs: [
+                            {
+                              tagName: "input",
+                              attributes: {
+                                value: specItem.unit
+                              }
+                            },
+                            {
+                              tagName: "input",
+                              style: {
+                                marginRight: "auto"
+                              },
+                              attributes: {
+                                value: specItem.spec,
+                                type: "number"
+                              }
+                            },
+                            {
+                              tagName: "div",
+                              className: "btn",
+                              innerText: "\u79FB\u9664",
+                              events: {
+                                click(e) {
+                                  if (brandItem.specs.length === 1) {
+                                    alert("\u6700\u540E\u4E00\u9879\u4E0D\u5141\u8BB8\u79FB\u9664");
+                                    return;
+                                  }
+                                  const confirm = window.confirm("\u786E\u5B9A\u79FB\u9664\u5417");
+                                  if (!confirm) return;
+                                  brandItem.specs.splice(specIndex, 1);
+                                  render();
+                                }
+                              }
+                            },
+                            {
+                              tagName: "div",
+                              className: "btn",
+                              innerText: "\u65B0\u589E",
+                              events: {
+                                click(e) {
+                                  brandItem.specs.splice(specIndex + 1, 0, {
+                                    unit: "",
+                                    spec: 1
+                                  });
+                                  render();
+                                }
+                              }
+                            }
+                          ]
+                        };
+                      })
+                    }
+                  ]
+                };
+              })
+            },
+            {
+              tagName: "div",
+              className: "material-brand-add-wrapper",
+              childs: [
+                {
+                  tagName: "div",
+                  className: "btn",
+                  style: {
+                    width: "140px"
+                  },
+                  innerText: "\u65B0\u589E\u54C1\u724C",
+                  events: {
+                    click(e) {
+                      const label = window.prompt("\u65B0\u7684\u54C1\u724C\u540D\u79F0") || "";
+                      if (!label.trim()) return;
+                      data.list.push({
+                        label,
+                        specs: [{
+                          unit: "\u4E2A",
+                          spec: 1
+                        }],
+                        priority: 1
+                      });
+                      render();
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }, shadowRoot);
+      }
+      render();
+    }
+  };
+
   // components/index.ts
   var components_default = [
     myCharts,
-    myInputs
+    myInputs,
+    myMaterialItem
   ];
 
   // src/init.ts
@@ -2021,6 +2230,9 @@
         removeChilds(actionContentNode);
         pageNavManager.updatePageNav();
         switch (actionItemType) {
+          case "materialsManager":
+            config.materialsManager(actionContentNode, { pageNavManager });
+            break;
           case "newData":
             config.newData(actionContentNode, { pageNavManager });
             break;
@@ -2054,11 +2266,95 @@
   }
   async function init(config) {
     await initRecordData();
-    initHtmlEvent(config);
     initComponents();
+    initHtmlEvent(config);
     updateRecordList();
   }
 
+  // src/materialsManager.ts
+  var materialsManager = async (parentNode, params) => {
+    const sys_materialsList = cloneData(materialsList);
+    const new_materialsList = cloneData(getNewMaterialsList());
+    function render() {
+      removeChilds(parentNode);
+      createElement({
+        tagName: "div",
+        className: "matetials-manager-wrapper",
+        childs: [
+          {
+            tagName: "div",
+            className: "matetials-list-wrapper",
+            childs: new_materialsList.map((materialItem) => {
+              return {
+                tagName: "div",
+                className: "matetial-item",
+                returnNode(ele) {
+                  params.pageNavManager.addPageNav(ele, materialItem.label);
+                },
+                childs: [
+                  createCustomElement("my-material-item", {
+                    data: materialItem,
+                    params: {}
+                  })
+                ]
+              };
+            })
+          },
+          {
+            tagName: "div",
+            className: "form-submit-wrapper",
+            returnNode(ele) {
+              params.pageNavManager.addPageNav(ele, "\u63D0\u4EA4\u533A");
+            },
+            childs: [
+              {
+                tagName: "div",
+                className: "form-submit-item",
+                innerText: "\u65B0\u589E\u7269\u6599",
+                events: {
+                  click(e) {
+                    const label = window.prompt("\u7269\u6599\u540D\u79F0") || "";
+                    if (!label.trim()) return;
+                    new_materialsList.push({
+                      label,
+                      list: [],
+                      unit: "\u4E2A",
+                      uasge: { min: 0, max: 1e3 }
+                    });
+                    render();
+                  }
+                }
+              },
+              {
+                tagName: "div",
+                className: "form-submit-item",
+                innerText: "\u66F4\u65B0",
+                events: {
+                  click(e) {
+                    setNewMaterialsList(new_materialsList);
+                    location.reload();
+                  }
+                }
+              },
+              {
+                tagName: "div",
+                className: "form-submit-item",
+                innerText: "\u6062\u590D\u7CFB\u7EDF",
+                events: {
+                  click() {
+                    setNewMaterialsList(sys_materialsList);
+                    location.reload();
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }, parentNode);
+    }
+    render();
+  };
+
   // src/index.ts
-  init({ newData, modifyData, viewData, inOutData });
+  init({ newData, modifyData, viewData, inOutData, materialsManager });
 })();

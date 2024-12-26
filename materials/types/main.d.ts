@@ -1,5 +1,5 @@
 import { DateFull,RecordItem,CreateElementConfig,RecordMaterialItem,RecordBelongsFields,MaterialsItem } from '@types'
-export type ActionTypes = 'newData' | 'modifyData' | 'viewData' | 'inOutData'
+export type ActionTypes = 'materialsManager' | 'newData' | 'modifyData' | 'viewData' | 'inOutData'
 export interface PageNavManager {
     nodesList:Array<{
         node:Element,

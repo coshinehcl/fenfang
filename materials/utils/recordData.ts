@@ -2,9 +2,9 @@
 import { DateFull,RecordItem,RecordMaterialItem,RecordMaterialItemBrandItem,BrandItem } from '@types'
 import { cloneData,getFormatNum } from '@utils'
 import { recordItemBelongs } from '@config/recordList'
-import { materialsList } from '@config/materialsList'
+import { getNewMaterialsList } from '@config/materialsList'
 const RecordListStorageKey = 'materials_recordList'
-
+const materialsList = getNewMaterialsList();
 /** 获取记录数据列表 */
 export const getRecordList = () => {
     const recordList = localStorage.getItem(RecordListStorageKey);
@@ -58,11 +58,11 @@ function updateBelongRecordMaterialItemList(oldBelongRecordMaterialItemList?:Arr
                     spec:__i.spec,
                     num:oldMaterialItemBrandItem ? oldMaterialItemBrandItem.numList[__index].num : 0
                 }
-
             })
             return {
                 label:_i.label,
                 priority:_i.priority,
+                isDeprecated:_i.isDeprecated || false,
                 numList:newNumList
             }
         })

@@ -459,3 +459,19 @@ export const materialsList:Array<MaterialsItem> = [
         unit:'袋'
     }
 ]
+const MaterialsListStorageKey = 'materials_list'
+export const getNewMaterialsList = ()=> {
+    let list = localStorage.getItem(MaterialsListStorageKey);
+    if(list) {
+        try {
+           return JSON.parse(list) as Array<MaterialsItem>;  
+        } catch(err) {
+            return materialsList
+        }
+    } else {
+        return materialsList;
+    }
+}
+export const setNewMaterialsList = (list:Array<MaterialsItem>) => {
+    localStorage.setItem(MaterialsListStorageKey,JSON.stringify(list));
+}

@@ -63,6 +63,8 @@ function initHtmlEvent(config:Record<ActionTypes,ActionHandler>){
             removeChilds(actionContentNode);
             pageNavManager.updatePageNav();
             switch(actionItemType){
+                case 'materialsManager':
+                    config.materialsManager(actionContentNode,{pageNavManager});break;
                 case 'newData':
                     config.newData(actionContentNode,{pageNavManager});break;
                 case 'modifyData':
@@ -94,7 +96,7 @@ function initComponents(){
 }
 export async function init(config:Record<ActionTypes,ActionHandler>){
     await initRecordData();
-    initHtmlEvent(config);
     initComponents();
+    initHtmlEvent(config);
     updateRecordList();
 }

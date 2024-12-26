@@ -1,10 +1,9 @@
 import { CreateForm, DateFull } from '@types'
-import { getRecordList,dateFullToNum,cloneData,createElement,removeChilds,createCustomElement } from '@utils'
+import { getRecordList,dateFullToNum,createElement,removeChilds,createCustomElement } from '@utils'
 import { recordItemBelongs } from '@config/recordList'
 function getLastRecordItem(date:DateFull){
     const recordList = getRecordList();
     const currentDateNum = dateFullToNum(date);
-    let lastRecordDataIndex = -1;
     const beforeRecordList =  recordList.filter(i => {
         const recordDataNum = dateFullToNum(i.recordDate);
         return recordDataNum < currentDateNum

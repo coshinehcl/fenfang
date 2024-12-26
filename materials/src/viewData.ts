@@ -1,7 +1,8 @@
 import { ActionHandler,ChartItemRenderDataItemLike,ChartLabelFields,ChartItemBasic,ChartItemBasicAndRenderBasic,ChartItem,GetArrayType,RecordBelongsFields, CreateElementConfig,ChartFooterItem } from '@types'
 import { getRecordList,cloneData, waitCondition, createElement, createCustomElement, removeChilds, getRecordBrandItemTotalInfo, getDayDistance, getFormatNum, getCurrentDate,formatSpecNum } from '@utils'
-import { materialsList } from '@config/materialsList'
+import { getNewMaterialsList } from '@config/materialsList'
 import { recordItemBelongs } from '@config/recordList'
+const materialsList = getNewMaterialsList();
 // 根据记录列表，拿到label单独的记录列表组成的基础数据数组
 function getChartItemBasicInfoList():Array<ChartItemBasic>{
     const recordList = getRecordList();
@@ -61,6 +62,7 @@ function getChartItemRenderDataBasicList(list:Array<ChartItemBasic>):Array<Chart
                             recordDate:recordItem.recordDate,
                             label:recordBrandItem.label,
                             priority:recordBrandItem.priority,
+                            isDeprecated:recordBrandItem.isDeprecated,
                             // 默认值，避免ts报错
                             ...defaultValueObj,
                             [belong.field]:getRecordBrandItemTotalInfo(recordBrandItem).total
@@ -298,10 +300,9 @@ function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBa
     })
 }
 export const viewData:ActionHandler = async (parentNode,params) => {
-    const chartItemBasicInfoList = getChartItemBasicInfoList();    
+    const chartItemBasicInfoList = getChartItemBasicInfoList();
     const chartItemBasicRenderDataList = getChartItemRenderDataBasicList(chartItemBasicInfoList);
-    const chartItemList = getChartItemRenderDataComputedList(chartItemBasicRenderDataList)
-    console.log(chartItemList);
+    const chartItemList = getChartItemRenderDataComputedList(chartItemBasicRenderDataList);
     await waitCondition(() => {
         return Chart !== undefined
     })

@@ -27,6 +27,7 @@ export function initCustomElement<T extends keyof CustomElementInitMap>(config:C
             }
         }
     }
+    console.log(config.tagName)
     customElements.define(config.tagName, myEle);
 }
 export function createCustomElement<T extends keyof CustomElementInitMap>(tagName:T,options:CustomElementInitMap[T],parentNode?:Element){

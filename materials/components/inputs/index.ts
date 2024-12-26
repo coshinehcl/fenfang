@@ -35,7 +35,7 @@ export const myInputs:ComponentsExport<'my-inputs'> = {
                 {
                     tagName:'div',
                     className:'list-wrapper',
-                    childs:data.list.map(brandItem => {
+                    childs:data.list.filter(brandItem => !brandItem.isDeprecated).map(brandItem => {
                         const lastBrandItem = params.lastMaterialItem?.list.find(x => x.label === brandItem.label);
                         let lastBrandTextList = [];
                         let lastBrandItemNum = 0;

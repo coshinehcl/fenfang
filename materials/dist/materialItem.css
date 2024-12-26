@@ -1,0 +1,75 @@
+/* components/materialItem/index.less */
+.wrapper {
+  margin: var(--margin);
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--borderRadius);
+  font-size: var(--fontSize);
+  position: relative;
+}
+.wrapper .btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 16%;
+  height: calc(var(--commonHeight) - 2px);
+  border: 1px solid #999;
+  border-radius: 10000px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+.wrapper input {
+  width: 33.3%;
+  font-size: 12px;
+  padding: 0;
+  border: none;
+  outline: none;
+  height: calc(var(--commonHeight) - 2px);
+  border: 1px solid #999;
+  border-radius: 10000px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 0 10px;
+  color: #666;
+}
+.wrapper .material-label {
+  text-align: center;
+  font-size: calc(var(--fontSize) - 1px);
+}
+.wrapper .usage-wrapper {
+  margin-top: var(--margin);
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+}
+.wrapper .material-brands-wrapper .brand-item {
+  margin-top: var(--margin);
+}
+.wrapper .material-brands-wrapper .brand-item .brand-label-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wrapper .material-brands-wrapper .brand-item .brand-label-wrapper .brand-label {
+  font-size: calc(var(--fontSize) - 2px);
+  font-weight: bold;
+}
+.wrapper .material-brands-wrapper .brand-item .brand-label-wrapper .brand-label.deprecated {
+  text-decoration: line-through;
+  color: #666;
+}
+.wrapper .material-brands-wrapper .brand-item .brand-label-wrapper .brand-remove {
+  font-size: calc(var(--fontSize) - 4px);
+  color: #666;
+}
+.wrapper .material-brands-wrapper .brand-item .brand-specs-wrapper .spec-wrapper {
+  margin-top: var(--margin);
+  display: flex;
+  align-items: center;
+}
+.wrapper .material-brand-add-wrapper {
+  margin-top: var(--margin);
+  display: flex;
+  justify-content: center;
+}

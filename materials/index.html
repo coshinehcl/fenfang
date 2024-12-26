@@ -6,12 +6,16 @@
     <title>物料管理</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels" defer></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js" defer></script> -->
     <!-- <script src="https://unpkg.com/write-excel-file@1.x/bundle/write-excel-file.min.js" defer></script> -->
     <style>
         html,body {
             margin: 0;
             padding: 0;
             font-size: 16px;
+        }
+        .sortable-ghost {
+            background-color: red;
         }
         body {
             --fontSize:16px;
@@ -190,10 +194,11 @@
 </head>
 <body>
     <div class="action">
-        <div class="action-item" data-type="newData">新增数据</div>
-        <div class="action-item" data-type="modifyData">修改数据</div>
-        <div class="action-item" data-type="viewData">查看数据</div>
-        <div class="action-item" data-type="inOutData">导入导出数据</div>
+        <div class="action-item" data-type="materialsManager">物料</div>
+        <div class="action-item" data-type="newData">新增</div>
+        <div class="action-item" data-type="modifyData">修改</div>
+        <div class="action-item" data-type="viewData">查看</div>
+        <div class="action-item" data-type="inOutData">导入导出</div>
     </div>
     <div class="action-content"></div>
     <div class="page-nav">

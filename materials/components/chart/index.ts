@@ -170,11 +170,13 @@ export const myCharts:ComponentsExport<'my-charts'> = {
             }
             childsCanvasList.push(canvasItemWrapper);
         }
-        if(renderData.brandList.length > 1) {
+        if(data.basicInof.brandList.length > 1) {
             generateCanvasElementConfig(renderData.materialItem);
         }
-        renderData.brandList.forEach((brandItemList,index) => {
-            generateCanvasElementConfig(brandItemList,data.basicInof.brandList[index].specs);
+        const renderBrandList =  renderData.brandList.filter(i => i[0].isDeprecated ? false : true);
+        renderBrandList.forEach((brandItemList,index) => {
+            const findBrand = data.basicInof.brandList.find(i => i.label === brandItemList[0].label);
+            generateCanvasElementConfig(brandItemList,findBrand?.specs);
         })
         createElement({
             tagName:'div',

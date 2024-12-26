@@ -1,6 +1,6 @@
 
 import { DateFull,MaterialsItem,GetArrayType } from './index'
-export interface RecordMaterialItemBrandItem extends Pick<GetArrayType<MaterialsItem['list']>,'label' | 'priority'>{
+export interface RecordMaterialItemBrandItem extends Pick<GetArrayType<MaterialsItem['list']>,'label' | 'priority' | 'isDeprecated'>{
     /** 该品牌的各规格数量 */
     numList: Array<GetArrayType<GetArrayType<MaterialsItem['list']>['specs']> 
     & {
