@@ -42,14 +42,26 @@ export const myMaterialItem:ComponentsExport<'my-material-item'> = {
                                 tagName:'input',
                                 attributes:{
                                     value:data.uasge.min,
+                                    placeHolder:'min',
                                     type:'number'
+                                },
+                                events:{
+                                    change(e:Event) {
+                                        data.uasge.min = Number((e.target as HTMLInputElement).value)
+                                    }
                                 }
                             },
                             {
                                 tagName:'input',
                                 attributes:{
                                     value:data.uasge.max,
+                                    placeHolder:'max',
                                     type:'number'
+                                },
+                                events:{
+                                    change(e:Event) {
+                                        data.uasge.max = Number((e.target as HTMLInputElement).value)
+                                    }
                                 }
                             },
                         ]
@@ -99,6 +111,11 @@ export const myMaterialItem:ComponentsExport<'my-material-item'> = {
                                                         tagName:'input',
                                                         attributes:{
                                                             value:specItem.unit
+                                                        },
+                                                        events:{
+                                                            change(e:Event) {
+                                                                specItem.unit = (e.target as HTMLInputElement).value as typeof specItem['unit']
+                                                            }
                                                         }
                                                     },
                                                     {
@@ -109,6 +126,11 @@ export const myMaterialItem:ComponentsExport<'my-material-item'> = {
                                                         attributes:{
                                                             value:specItem.spec,
                                                             type:'number'
+                                                        },
+                                                        events:{
+                                                            change(e:Event) {
+                                                                specItem.spec = Number((e.target as HTMLInputElement).value || 1) as typeof specItem['spec']
+                                                            }
                                                         }
                                                     },
                                                     {
@@ -169,7 +191,7 @@ export const myMaterialItem:ComponentsExport<'my-material-item'> = {
                                         data.list.push({
                                             label,
                                             specs:[{
-                                                unit:'个',
+                                                unit:'' as GetArrayType<BrandItem['specs']>['unit'],
                                                 spec:1
                                             }],
                                             priority:1

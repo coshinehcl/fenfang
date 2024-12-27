@@ -1,4 +1,4 @@
-import { ActionHandler,ChartItemRenderDataItemLike,ChartLabelFields,ChartItemBasic,ChartItemBasicAndRenderBasic,ChartItem,GetArrayType,RecordBelongsFields, CreateElementConfig,ChartFooterItem } from '@types'
+import { ActionHandler,ChartItemRenderDataItemLike,ChartLabelFields,ChartItemBasic,ChartItemBasicAndRenderBasic,ChartItem,GetArrayType,RecordBelongsFields, CreateElementConfig,ChartFooterItem,GetArrayKeyTypes } from '@types'
 import { getRecordList,cloneData, waitCondition, createElement, createCustomElement, removeChilds, getRecordBrandItemTotalInfo, getDayDistance, getFormatNum, getCurrentDate,formatSpecNum } from '@utils'
 import { getNewMaterialsList } from '@config/materialsList'
 import { recordItemBelongs } from '@config/recordList'
@@ -165,7 +165,7 @@ function getMaterialOutSuggestInfo(item:ChartItemRenderDataItemLike,basicInfo:Ch
     }
 }
 // 处理基础的渲染数据，得到dayUse等计算值
-function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBasic>):Array<ChartItem> {
+function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBasic>,needSufficeDay=40):Array<ChartItem> {
     return list.map(chartBasicItem => {
         // 先计算物料本身
         const newRenderDataMaterialItemList:ChartItem['renderData']['materialItem'] = [];
@@ -204,7 +204,6 @@ function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBa
                 if(lastPushItem.averageDayUse !== '-') {
                     lastPushItem.availableDay = getFormatNum(lastPushItem.repo / lastPushItem.averageDayUse);
                     let availableDay = lastPushItem.availableDay;
-                    const needSufficeDay = 40;
                     function getBrandPerchaseFormatNum(num:number){
                         // 默认只用第一个品牌来作为参考
                         const lastFormatItem = formatSpecNum(chartBasicItem.basicInof.brandList[0].specs,num).slice(-1)[0];
@@ -302,7 +301,7 @@ function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBa
 export const viewData:ActionHandler = async (parentNode,params) => {
     const chartItemBasicInfoList = getChartItemBasicInfoList();
     const chartItemBasicRenderDataList = getChartItemRenderDataBasicList(chartItemBasicInfoList);
-    const chartItemList = getChartItemRenderDataComputedList(chartItemBasicRenderDataList);
+    const chartItemList = getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList));
     await waitCondition(() => {
         return Chart !== undefined
     })
@@ -339,7 +338,7 @@ export const viewData:ActionHandler = async (parentNode,params) => {
             label:'消耗对比',
             list:['dayUse','averageDayUse'],
             footer:[(item) => {
-                return `日耗${item.dayUse},均日耗<strong>${item.availableDay}</strong>`
+                return `日耗${item.dayUse},均日耗<strong>${item.averageDayUse}</strong>`
             }]
         },
         {
@@ -352,7 +351,7 @@ export const viewData:ActionHandler = async (parentNode,params) => {
             list:['availableDay','purchaseSuggest'],
             footer:['purchaseSuggestText']
         }
-    ]
+    ];
     const chartWrapperNode = createElement({
         tagName:'div',
         className:'chart-wrapper',
@@ -401,44 +400,92 @@ export const viewData:ActionHandler = async (parentNode,params) => {
             },
             {
                 tagName:'div',
+                className:'chart-content-before-slot'
+            },
+            {
+                tagName:'div',
                 className:'chart-content'
             }
         ]
     },parentNode)
-    function render(chartLabelStr:string = ''){
+    function render(chartLabelStr:string){
         const chartContentNode = chartWrapperNode.querySelector('.chart-content');
         if(!chartContentNode) return;
-        removeChilds(chartContentNode);
         params.pageNavManager.updatePageNav();
-        if(!chartLabelStr) return;
-        const findChartLabelItem = chartSelectOptions.find(i => i.label === chartLabelStr);
-        if(!findChartLabelItem) return;
-        chartItemList.forEach(chartItem => {
-            const myCharts = createCustomElement('my-charts',{
-                data:chartItem,
-                params:{
-                    label:chartItem.label,
-                    datasetsLabels:findChartLabelItem.list,
-                    footer:findChartLabelItem.footer,
-                    datasetsLabelsMap:chartSelectOptionsFieldMap
-                }
-            })
+        const chartContentBeforeSlot = chartWrapperNode.querySelector('.chart-content-before-slot');
+        if(!chartContentBeforeSlot) return;
+        if(chartLabelStr === '购买建议') {
+            function getSelectValueAndRender(ele:Element){
+                const value = Number((ele as HTMLSelectElement).value)
+                const newChartList =getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList),value);
+                renderBody(newChartList);
+            }
             createElement({
                 tagName:'div',
-                className:'chart-item',
-                returnNode(ele){
-                    params.pageNavManager.addPageNav(ele,chartItem.label);
-                },
+                className:'purchase-day-select',
                 childs:[
                     {
-                        tagName:'div',
-                        className:'chart-item-title',
-                        innerText:chartItem.label
+                        tagName:'label',
+                        innerText:'选择天数',
                     },
-                    myCharts
+                    {
+                        tagName:'select',
+                        className:'day-select',
+                        returnAttachedNode(ele) {
+                            getSelectValueAndRender(ele)
+                        },
+                        events:{
+                            change(e:Event){
+                                if(!e.target) return;
+                                getSelectValueAndRender(e.target as Element)
+                            }
+                        },
+                        childs:[30,40,45,50,55,60,65,70].map(i => ({
+                            tagName:'option',
+                            attributes:{
+                                value:i
+                            },
+                            innerText:i + '天'
+                        }))
+                    }
                 ]
-            },chartContentNode)
-        })
+            },chartContentBeforeSlot)
+        } else {
+            removeChilds(chartContentBeforeSlot);
+            renderBody(chartItemList)
+        }
+        function renderBody(chartList:Array<ChartItem>){
+            if(!chartContentNode) return;
+            removeChilds(chartContentNode);
+            if(!chartLabelStr) return;
+            const findChartLabelItem = chartSelectOptions.find(i => i.label === chartLabelStr);
+            if(!findChartLabelItem) return;
+            chartList.forEach(chartItem => {
+                const myCharts = createCustomElement('my-charts',{
+                    data:chartItem,
+                    params:{
+                        label:chartItem.label,
+                        datasetsLabels:findChartLabelItem.list,
+                        footer:findChartLabelItem.footer,
+                        datasetsLabelsMap:chartSelectOptionsFieldMap
+                    }
+                })
+                createElement({
+                    tagName:'div',
+                    className:'chart-item',
+                    returnNode(ele){
+                        params.pageNavManager.addPageNav(ele,chartItem.label);
+                    },
+                    childs:[
+                        {
+                            tagName:'div',
+                            className:'chart-item-title',
+                            innerText:chartItem.label
+                        },
+                        myCharts
+                    ]
+                },chartContentNode)
+            })
+        }
     }
-    render();
 }

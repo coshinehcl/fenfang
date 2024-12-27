@@ -1229,7 +1229,7 @@
       outSuggestText
     };
   }
-  function getChartItemRenderDataComputedList(list) {
+  function getChartItemRenderDataComputedList(list, needSufficeDay = 40) {
     return list.map((chartBasicItem) => {
       const newRenderDataMaterialItemList = [];
       chartBasicItem.renderData.materialItem.forEach((materialItemRenderListItem, index) => {
@@ -1271,7 +1271,6 @@
             var getBrandPerchaseFormatNum = getBrandPerchaseFormatNum2;
             lastPushItem.availableDay = getFormatNum(lastPushItem.repo / lastPushItem.averageDayUse);
             let availableDay = lastPushItem.availableDay;
-            const needSufficeDay = 40;
             if (index === chartBasicItem.renderData.materialItem.length - 1) {
               const dayDistance2 = getDayDistance(getCurrentDate().full, lastItem.recordDate);
               const currentRepoNum = getFormatNum(lastPushItem.repo - lastPushItem.averageDayUse * dayDistance2);
@@ -1359,7 +1358,7 @@
   var viewData = async (parentNode, params) => {
     const chartItemBasicInfoList = getChartItemBasicInfoList();
     const chartItemBasicRenderDataList = getChartItemRenderDataBasicList(chartItemBasicInfoList);
-    const chartItemList = getChartItemRenderDataComputedList(chartItemBasicRenderDataList);
+    const chartItemList = getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList));
     await waitCondition(() => {
       return Chart !== void 0;
     });
@@ -1390,7 +1389,7 @@
         label: "\u6D88\u8017\u5BF9\u6BD4",
         list: ["dayUse", "averageDayUse"],
         footer: [(item) => {
-          return `\u65E5\u8017${item.dayUse},\u5747\u65E5\u8017<strong>${item.availableDay}</strong>`;
+          return `\u65E5\u8017${item.dayUse},\u5747\u65E5\u8017<strong>${item.averageDayUse}</strong>`;
         }]
       },
       {
@@ -1451,46 +1450,95 @@
         },
         {
           tagName: "div",
+          className: "chart-content-before-slot"
+        },
+        {
+          tagName: "div",
           className: "chart-content"
         }
       ]
     }, parentNode);
-    function render(chartLabelStr = "") {
+    function render(chartLabelStr) {
       const chartContentNode = chartWrapperNode.querySelector(".chart-content");
       if (!chartContentNode) return;
-      removeChilds(chartContentNode);
       params.pageNavManager.updatePageNav();
-      if (!chartLabelStr) return;
-      const findChartLabelItem = chartSelectOptions.find((i) => i.label === chartLabelStr);
-      if (!findChartLabelItem) return;
-      chartItemList.forEach((chartItem) => {
-        const myCharts2 = createCustomElement("my-charts", {
-          data: chartItem,
-          params: {
-            label: chartItem.label,
-            datasetsLabels: findChartLabelItem.list,
-            footer: findChartLabelItem.footer,
-            datasetsLabelsMap: chartSelectOptionsFieldMap
-          }
-        });
+      const chartContentBeforeSlot = chartWrapperNode.querySelector(".chart-content-before-slot");
+      if (!chartContentBeforeSlot) return;
+      if (chartLabelStr === "\u8D2D\u4E70\u5EFA\u8BAE") {
+        let getSelectValueAndRender2 = function(ele) {
+          const value = Number(ele.value);
+          const newChartList = getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList), value);
+          renderBody(newChartList);
+        };
+        var getSelectValueAndRender = getSelectValueAndRender2;
         createElement({
           tagName: "div",
-          className: "chart-item",
-          returnNode(ele) {
-            params.pageNavManager.addPageNav(ele, chartItem.label);
-          },
+          className: "purchase-day-select",
           childs: [
             {
-              tagName: "div",
-              className: "chart-item-title",
-              innerText: chartItem.label
+              tagName: "label",
+              innerText: "\u9009\u62E9\u5929\u6570"
             },
-            myCharts2
+            {
+              tagName: "select",
+              className: "day-select",
+              returnAttachedNode(ele) {
+                getSelectValueAndRender2(ele);
+              },
+              events: {
+                change(e) {
+                  if (!e.target) return;
+                  getSelectValueAndRender2(e.target);
+                }
+              },
+              childs: [30, 40, 45, 50, 55, 60, 65, 70].map((i) => ({
+                tagName: "option",
+                attributes: {
+                  value: i
+                },
+                innerText: i + "\u5929"
+              }))
+            }
           ]
-        }, chartContentNode);
-      });
+        }, chartContentBeforeSlot);
+      } else {
+        removeChilds(chartContentBeforeSlot);
+        renderBody(chartItemList);
+      }
+      function renderBody(chartList) {
+        if (!chartContentNode) return;
+        removeChilds(chartContentNode);
+        if (!chartLabelStr) return;
+        const findChartLabelItem = chartSelectOptions.find((i) => i.label === chartLabelStr);
+        if (!findChartLabelItem) return;
+        chartList.forEach((chartItem) => {
+          const myCharts2 = createCustomElement("my-charts", {
+            data: chartItem,
+            params: {
+              label: chartItem.label,
+              datasetsLabels: findChartLabelItem.list,
+              footer: findChartLabelItem.footer,
+              datasetsLabelsMap: chartSelectOptionsFieldMap
+            }
+          });
+          createElement({
+            tagName: "div",
+            className: "chart-item",
+            returnNode(ele) {
+              params.pageNavManager.addPageNav(ele, chartItem.label);
+            },
+            childs: [
+              {
+                tagName: "div",
+                className: "chart-item-title",
+                innerText: chartItem.label
+              },
+              myCharts2
+            ]
+          }, chartContentNode);
+        });
+      }
     }
-    render();
   };
 
   // src/inOutData.ts
@@ -2017,14 +2065,26 @@
                   tagName: "input",
                   attributes: {
                     value: data.uasge.min,
+                    placeHolder: "min",
                     type: "number"
+                  },
+                  events: {
+                    change(e) {
+                      data.uasge.min = Number(e.target.value);
+                    }
                   }
                 },
                 {
                   tagName: "input",
                   attributes: {
                     value: data.uasge.max,
+                    placeHolder: "max",
                     type: "number"
+                  },
+                  events: {
+                    change(e) {
+                      data.uasge.max = Number(e.target.value);
+                    }
                   }
                 }
               ]
@@ -2074,6 +2134,11 @@
                               tagName: "input",
                               attributes: {
                                 value: specItem.unit
+                              },
+                              events: {
+                                change(e) {
+                                  specItem.unit = e.target.value;
+                                }
                               }
                             },
                             {
@@ -2084,6 +2149,11 @@
                               attributes: {
                                 value: specItem.spec,
                                 type: "number"
+                              },
+                              events: {
+                                change(e) {
+                                  specItem.spec = Number(e.target.value || 1);
+                                }
                               }
                             },
                             {
@@ -2143,7 +2213,7 @@
                       data.list.push({
                         label,
                         specs: [{
-                          unit: "\u4E2A",
+                          unit: "",
                           spec: 1
                         }],
                         priority: 1
