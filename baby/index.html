@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Document</title>
+    <style>
+        body,html {
+            padding: 0;
+            margin: 0;
+            font-size: 18px;
+            --lineColor:#999;
+            --lightColor:#3366FF;
+        }
+        .item-wrapper {
+            margin:10px;
+            border: 1px solid var(--lineColor);
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center
+        }
+        .item-title-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-week-add-btn {
+            margin-top: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 2px 4px;
+            margin-left: auto;
+            border:1px solid var(--lineColor);
+        }
+        .item-content {
+            width: 100%;
+            font-size: 16px;
+        }
+        .key-date-item {
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px;
+            border: 1px dashed var(--lineColor);
+            border-radius: 4px;
+        }
+        .key-date-item-title {
+            color: var(--lightColor);
+        }
+        .key-date-item-date {
+            color: var(--lineColor);
+        }
+        .item-month-split {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            color: var(--lineColor);
+        }
+        #addDialog {
+            position: fixed;
+            top: 20%;
+            width: 100vw;
+            padding:10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #addDialog input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 8px;
+            margin: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="show-contain"></div>
+    <div id="addDialog" style="display: none;">
+        <input type="text" placeholder="标题"/>
+        <input type="text" placeholder="备注" />
+        <input type="text" placeholder="日期:YYYYMMDD格式"/>
+        <button id="add-submit-btn" onclick="">完成</button>
+    </div>
+</body>
+<script>
+    const addDialogBtn = document.querySelector('#addDialog button');
+    addDialogBtn.addEventListener('click', () => {
+        const inputs = document.querySelectorAll('#addDialog input');
+        const title = inputs[0].value;
+        const content = inputs[1].value;
+        const date = inputs[2].value;
+        if (!title || !content || !date) {
+            alert('请填写完整');
+            return;
+        }
+        const parentElement = addDialogBtn.parentElement;
+        parentElement.dispatchEvent(new CustomEvent('add-finish', {
+            detail: {
+                belongDate: parentElement.dataset.date,
+                title,
+                content,
+                date
+            }
+        }));
+        parentElement.style.display = 'none';
+    });
+</script>
+<script src="./dist/index.js"></script>
+</html>
