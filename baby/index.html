@@ -11,6 +11,13 @@
             font-size: 18px;
             --lineColor:#999;
             --lightColor:#3366FF;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Standard syntax */
+        }
+        .show-contain {
+            margin-bottom: 200px;
         }
         .item-wrapper {
             margin:10px;
@@ -27,6 +34,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        .item-img {
+            width: 100%;
+            height: auto;
         }
         .item-week-add-btn {
             margin-top: 4px;
@@ -52,9 +63,15 @@
         }
         .key-date-item-title {
             color: var(--lightColor);
+            width: calc(50% - 35px);
+        }
+        .key-date-item-content {
+            color: var(--lineColor);
+            width: calc(50% - 35px);
         }
         .key-date-item-date {
             color: var(--lineColor);
+            width: 70px;
         }
         .item-month-split {
             display: flex;
@@ -63,11 +80,23 @@
             font-size: 15px;
             color: var(--lineColor);
         }
-        #addDialog {
+        #addDialog .mask {
             position: fixed;
-            top: 20%;
+            z-index: 1;
+            top: 0;
+            left: 0;
             width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, .5);
+            z-index: 1;
+        }
+        #addDialog .contain {
+            position: fixed;
+            z-index: 10;
+            top: 20%;
+            width: calc(100vw - 20px);
             padding:10px;
+            margin: 10px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             background-color: #fff;
@@ -75,6 +104,7 @@
             box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
             display: flex;
             flex-wrap: wrap;
+            font-size: 16px;
             justify-content: center;
         }
         #addDialog input {
@@ -82,8 +112,34 @@
             width: 100%;
             padding: 8px;
             margin: 8px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+        }
+        #addDialog button {
+            width: 100px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 10px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .current-date {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 100%;
+            position: fixed;
+            bottom: 40px;
+            right: 20px;
+            color:red;
+            background-color: rgba(0, 0, 0, .7);
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
         }
     </style>
 </head>
@@ -91,33 +147,41 @@
 <body>
     <div class="show-contain"></div>
     <div id="addDialog" style="display: none;">
-        <input type="text" placeholder="标题"/>
-        <input type="text" placeholder="备注" />
-        <input type="text" placeholder="日期:YYYYMMDD格式"/>
-        <button id="add-submit-btn" onclick="">完成</button>
+        <div class="mask"></div>
+        <div class="contain">
+            <input type="text" placeholder="标题"/>
+            <input type="text" placeholder="备注" />
+            <input type="text" class="dialog-date" placeholder="日期:YYYYMMDD格式"/>
+            <button id="add-submit-btn" onclick="">完成</button>
+        </div>
     </div>
+    <div class="current-date">当前</div>
 </body>
 <script>
-    const addDialogBtn = document.querySelector('#addDialog button');
-    addDialogBtn.addEventListener('click', () => {
-        const inputs = document.querySelectorAll('#addDialog input');
+    const addDialog = document.querySelector('#addDialog');
+    const dialogMask = addDialog.querySelector('.mask');
+    const dialogBtn = addDialog.querySelector('button');
+    dialogMask.addEventListener('click', () => {
+        addDialog.style.display = 'none';
+    });
+    dialogBtn.addEventListener('click', () => {
+        const inputs = addDialog.querySelectorAll('input');
         const title = inputs[0].value;
         const content = inputs[1].value;
         const date = inputs[2].value;
-        if (!title || !content || !date) {
-            alert('请填写完整');
+        if (!title || !date) {
+            alert('标题和日期不可为空');
             return;
         }
-        const parentElement = addDialogBtn.parentElement;
-        parentElement.dispatchEvent(new CustomEvent('add-finish', {
+        addDialog.dispatchEvent(new CustomEvent('add-finish', {
             detail: {
-                belongDate: parentElement.dataset.date,
+                belongDate: addDialog.dataset.date,
                 title,
                 content,
                 date
             }
         }));
-        parentElement.style.display = 'none';
+        addDialog.style.display = 'none';
     });
 </script>
 <script src="./dist/index.js"></script>

@@ -44,24 +44,24 @@
     const end = parseDate(endDateStr);
     start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
-    const weekRanges = [];
+    const weekRanges2 = [];
     while (start <= end) {
-      weekRanges.push(formatDate(start).full);
+      weekRanges2.push(formatDate(start).full);
       start.setDate(start.getDate() + 7);
     }
-    return weekRanges;
+    return weekRanges2;
   }
   function getMonthRanges(startDateStr, endDateStr) {
     let start = parseDate(startDateStr);
     const end = parseDate(endDateStr);
     start.setHours(0, 0, 0, 0);
     end.setHours(0, 0, 0, 0);
-    const monthRanges = [];
+    const monthRanges2 = [];
     while (start <= end) {
-      monthRanges.push(formatDate(start).full);
+      monthRanges2.push(formatDate(start).full);
       start.setMonth(start.getMonth() + 1);
     }
-    return monthRanges;
+    return monthRanges2;
   }
 
   // utils/element.ts
@@ -126,6 +126,50 @@
 
   // utils/storage.ts
   var babyKeyDateKey = "babyKeyDateKey";
+  var defaultKeyDate = [
+    {
+      belongWeek: "20241010",
+      title: "\u793E\u533A\u533B\u9662",
+      content: "\u5B55\u916E",
+      date: "20241012"
+    },
+    {
+      belongWeek: "20241212",
+      title: "\u7B2C1\u6B21\u4EA7\u68C0",
+      content: "\u5C3F\u8840",
+      date: "20241214"
+    },
+    {
+      belongWeek: "20241212",
+      title: "\u7B2C2\u6B21\u4EA7\u68C0",
+      content: "NT\u68C0\u67E5",
+      date: "20241216"
+    },
+    {
+      belongWeek: "20250102",
+      title: "\u7B2C3\u6B21\u4EA7\u68C0",
+      content: "\u65E0\u521B",
+      date: "20250102"
+    },
+    {
+      belongWeek: "20250116",
+      title: "\u7B2C4\u6B21\u4EA7\u68C0",
+      content: "\u5C3F\u5E38\u89C4",
+      date: "20250120"
+    },
+    {
+      belongWeek: "20250206",
+      title: "\u7B2C5\u6B21\u4EA7\u68C0",
+      content: "\u56DB\u7EF4\u5F69\u8D85",
+      date: "20250208"
+    },
+    {
+      belongWeek: "20250213",
+      title: "\u7B2C6\u6B21\u4EA7\u68C0",
+      content: "\u5C3F\u5E38\u89C4",
+      date: "20250217"
+    }
+  ];
   var getKeyDateList = () => {
     const keyDateList = localStorage.getItem(babyKeyDateKey);
     if (keyDateList) {
@@ -133,10 +177,10 @@
         const _list = JSON.parse(keyDateList);
         return Array.isArray(_list) ? _list : [];
       } catch (err) {
-        return [];
+        return defaultKeyDate;
       }
     } else {
-      return [];
+      return defaultKeyDate;
     }
   };
   var setKeyDateList = (list) => {
@@ -144,13 +188,13 @@
   };
 
   // index.ts
+  var startDate = "20240905";
+  var endDate = "20250720";
+  var weekRanges = getWeekRanges(startDate, endDate);
+  var monthRanges = getMonthRanges(startDate, endDate);
   function updateItems() {
     const RootNode = document.querySelector(".show-contain");
     if (!RootNode) return;
-    const startDate = "20240905";
-    const endDate = "20250720";
-    const weekRanges = getWeekRanges(startDate, endDate);
-    const monthRanges = getMonthRanges(startDate, endDate);
     const dateRanges = [
       ...weekRanges.map((i, index) => ({ type: "week", date: i, index })),
       ...monthRanges.map((i, index) => ({ type: "month", date: i, index }))
@@ -186,6 +230,17 @@
                   innerText: item.date
                 }
               ]
+            },
+            {
+              tagName: "img",
+              className: "item-img",
+              style: {
+                display: item.index >= 1 && item.index <= 40 ? "block" : "none"
+              },
+              attributes: {
+                src: `./images/${item.index}.png`,
+                loading: "lazy"
+              }
             },
             {
               tagName: "div",
@@ -239,6 +294,7 @@
                 click: () => {
                   if (!addDialogNode) return;
                   addDialogNode.style.display = "flex";
+                  addDialogNode.querySelector(".dialog-date").value = item.date;
                   addDialogNode.dataset.date = item.date;
                 }
               }
@@ -266,5 +322,23 @@
       updateItems();
     }, { once: true });
   }
+  function initCurrentDateNodeEvent() {
+    const currentDateNode = document.querySelector(".current-date");
+    if (!currentDateNode) return;
+    const currentDate = getCurrentDate().full;
+    const findIndex = weekRanges.findIndex((item) => parseDate(item).getTime() >= parseDate(currentDate).getTime());
+    currentDateNode.addEventListener("click", function() {
+      if (findIndex === -1) {
+        return;
+      }
+      const targetWeekItem = document.querySelectorAll(".item-wrapper")[findIndex];
+      if (targetWeekItem) {
+        targetWeekItem.scrollIntoView({
+          behavior: "smooth"
+        });
+      }
+    });
+  }
   updateItems();
+  initCurrentDateNodeEvent();
 })();

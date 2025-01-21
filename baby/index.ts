@@ -1,12 +1,12 @@
-import {createElement,removeChilds,parseDate,getWeekRanges,getMonthRanges,getKeyDateList,setKeyDateList} from '@utils'
+import {createElement,removeChilds,getCurrentDate,parseDate,getWeekRanges,getMonthRanges,getKeyDateList,setKeyDateList} from '@utils'
+const startDate = '20240905';
+const endDate = '20250720';
+const weekRanges = getWeekRanges(startDate,endDate);
+const monthRanges = getMonthRanges(startDate,endDate);
 
 function updateItems(){
     const RootNode = document.querySelector('.show-contain');
     if(!RootNode) return;
-    const startDate = '20240905';
-    const endDate = '20250720';
-    const weekRanges = getWeekRanges(startDate,endDate);
-    const monthRanges = getMonthRanges(startDate,endDate);
     const dateRanges = [
         ...weekRanges.map((i,index) => ({type:'week',date:i,index:index})),
         ...monthRanges.map((i,index) => ({type:'month',date:i,index:index})),
@@ -44,6 +44,17 @@ function updateItems(){
                                 innerText:item.date
                             },
                         ]
+                    },
+                    {
+                        tagName:'img',
+                        className:'item-img',
+                        style:{
+                            display:item.index >= 1 && item.index <= 40 ? 'block' : 'none'
+                        },
+                        attributes:{
+                            src:`./images/${item.index}.png`,
+                            loading:"lazy"
+                        }
                     },
                     {
                         tagName:'div',
@@ -97,6 +108,7 @@ function updateItems(){
                             click:()=> {
                                 if(!addDialogNode) return;
                                 addDialogNode.style.display = 'flex';
+                                (addDialogNode.querySelector('.dialog-date') as HTMLInputElement).value = item.date;
                                 addDialogNode.dataset.date = item.date;
                             }
                         }
@@ -125,4 +137,22 @@ function updateItems(){
         updateItems();
     },{once:true})
 }
+function initCurrentDateNodeEvent(){
+    const currentDateNode = document.querySelector('.current-date');
+    if(!currentDateNode) return;
+    const currentDate = getCurrentDate().full;
+    const findIndex = weekRanges.findIndex(item => parseDate(item).getTime() >= parseDate(currentDate).getTime());
+    currentDateNode.addEventListener('click',function(){
+        if(findIndex === -1) {
+            return;
+        }
+        const targetWeekItem = document.querySelectorAll('.item-wrapper')[findIndex];
+        if(targetWeekItem) {
+            targetWeekItem.scrollIntoView({
+                behavior:'smooth'
+            })
+        }
+    })
+}
 updateItems();
+initCurrentDateNodeEvent();
