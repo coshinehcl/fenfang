@@ -192,6 +192,21 @@
   var endDate = "20250720";
   var weekRanges = getWeekRanges(startDate, endDate);
   var monthRanges = getMonthRanges(startDate, endDate);
+  var imageLazy = function imageObserver() {
+    const observer = new IntersectionObserver((entries, observer2) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          observer2.unobserve(img);
+        }
+      });
+    }, {
+      rootMargin: "50px"
+      // 可以提前一点加载图片
+    });
+    return observer.observe.bind(observer);
+  }();
   function updateItems() {
     const RootNode = document.querySelector(".show-contain");
     if (!RootNode) return;
@@ -238,8 +253,10 @@
                 display: item.index >= 1 && item.index <= 40 ? "block" : "none"
               },
               attributes: {
-                src: `./images/${item.index}.png`,
-                loading: "lazy"
+                "data-src": `./images/${item.index}.png`
+              },
+              returnNode(ele) {
+                imageLazy(ele);
               }
             },
             {
