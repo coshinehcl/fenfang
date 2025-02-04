@@ -35,6 +35,11 @@
             justify-content: space-between;
             align-items: center;
         }
+        .item-title-wrapper > div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .item-img {
             width: 100%;
             height: auto;
@@ -141,6 +146,21 @@
             cursor: pointer;
             box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
         }
+        .goHome {
+            display: block;
+            position: fixed;
+            left: 20px;
+            bottom:20px;
+            font-size: 12px;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            border:1px solid #999;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -156,6 +176,7 @@
         </div>
     </div>
     <div class="current-date">当前</div>
+    <a class="goHome" href="../home.html">首页</a>
 </body>
 <script>
     const addDialog = document.querySelector('#addDialog');

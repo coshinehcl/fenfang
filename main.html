@@ -15,6 +15,13 @@
             width: 100vw;
             box-sizing: border-box;
         }
+        .base-info {
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
         .form .item,.form .item-btn {
             display: flex;
             width: 100%;
@@ -124,10 +131,42 @@
             color: #999;
             font-size: 15px;
         }
+        .goHome {
+            display: block;
+            position: fixed;
+            left: 20px;
+            bottom:20px;
+            font-size: 12px;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            border:1px solid #999;
+            text-decoration: none;
+        }
+        .toast {
+            position: fixed;
+            top:30vh;
+            left:50vw;
+            padding:4px 10px;
+            transform: translateX(-50%);
+            /* border:1px solid #999; */
+            background-color: rgba(153, 153, 153,.2);
+            color:#0066FF;
+            font-size: 15px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
+   
     <div class="form">
+        <div class="base-info">
+            <div class="current-day"></div>
+            <div class="plan"></div>
+        </div>
         <div class="item">
             <label for="od">OD房</label>
             <input id="od" type="number" placeholder="0">
@@ -161,7 +200,43 @@
     </div>
     <div class="form-result"></div>
     <div class="form-result-help"></div>
+    <a class="goHome" href="../home.html">首页</a>
+    <div class="toast" style="display:none;"></div>
 </body>
+<script>
+    const days = [
+        ['星期日',`墙纸`], 
+        ['星期一','门，门框，猫眼，锁洞，开关盒'],
+        ['星期二','马桶，马桶背后，马桶出水口，卫生间地面'],
+        ['星期三','所有不锈钢(水龙头，卫生间门把手)'],
+        ['星期四','电视机，电视墙，遥控器，电话机'],
+        ['星期五','窗户，窗槽，窗户玻璃，纱窗，窗台'],
+        ['星期六','地脚线，垃圾桶'],
+    ]
+    const today = new Date();
+    const dayIndex = today.getDay();
+    const baseInfoNode = document.querySelector('.base-info');
+    baseInfoNode.querySelector('.current-day').innerText = `今天${days[dayIndex][0]}`;
+    const planText = `今天的计划卫生：\n${days[dayIndex][1]}`;
+    baseInfoNode.querySelector('.plan').innerText = planText
+    baseInfoNode.addEventListener('click',() => {
+        // 黏贴
+        const textArea = document.createElement('textarea');
+        textArea.value = planText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        // toast
+        const toast = document.querySelector('.toast');
+        toast.style.display = 'block';
+        toast.innerText = '复制成功';
+        setTimeout(() => {
+            toast.innerText = '';
+            toast.style.display = 'none';
+        }, 1000);
+    })
+</script>
 <script>
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -300,6 +375,15 @@
         // 滚动到结果区域
         formResult.scrollIntoView({behavior:'smooth'});
     }
+    function showToast(str){
+        const toast = document.querySelector('.toast');
+        toast.style.display = 'block';
+        toast.innerText = str;
+        setTimeout(() => {
+            toast.innerText = '';
+            toast.style.display = 'none';
+        }, 2000);
+    }
     btn.addEventListener('click',()=> {
         const formValues = {};
         Array.from(items).forEach(_item => {
@@ -309,11 +393,11 @@
             })
         })
         if(!formValues.od || !formValues.num) {
-            alert('确保OD房和上班人数有值')
+            showToast('确保OD房和上班人数有值')
             return;
         }
         if(formValues.od < formValues.od_sc) {
-            alert('OD房比OD双床少，检查数据准确性')
+            showToast('OD房比OD双床少，检查数据准确性')
             return;
         }
         // 缺失值补上

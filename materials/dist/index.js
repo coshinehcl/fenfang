@@ -111,13 +111,35 @@
   };
 
   // utils/customElement.ts
+  function preloadStyle(cssName) {
+    const url = `./dist/${cssName}.css`;
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", url);
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(xhr.responseText);
+        } else {
+          reject(new Error(`Failed to load stylesheet: ${xhr.status}`));
+        }
+      };
+      xhr.onerror = () => reject(new Error("Failed to load stylesheet"));
+      xhr.send();
+    });
+  }
   function initCustomElement(config) {
+    const stylePromise = preloadStyle(config.cssName);
     class myEle extends HTMLElement {
       constructor() {
         super();
         this.$shadowRoot = this.attachShadow({ mode: "closed" });
       }
       connectedCallback() {
+        stylePromise.then((res) => {
+          const styles = new CSSStyleSheet();
+          styles.replaceSync(res);
+          this.$shadowRoot.adoptedStyleSheets = [styles];
+        });
         if (this.$initHandler) {
           this.$initHandler();
         }
@@ -137,7 +159,6 @@
         }
       }
     }
-    console.log(config.tagName);
     customElements.define(config.tagName, myEle);
   }
   function createCustomElement(tagName, options, parentNode) {
@@ -1469,6 +1490,7 @@
           const value = Number(ele.value);
           const newChartList = getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList), value);
           renderBody(newChartList);
+          params.pageNavManager.updatePageNav();
         };
         var getSelectValueAndRender = getSelectValueAndRender2;
         createElement({
@@ -1640,14 +1662,8 @@
   // components/chart/index.ts
   var myCharts = {
     tagName: "my-charts",
+    cssName: "chart",
     createNode(shadowRoot, data, params) {
-      createElement({
-        tagName: "link",
-        attributes: {
-          rel: "stylesheet",
-          href: "./dist/chart.css"
-        }
-      }, shadowRoot);
       const childsCanvasList = [];
       const renderData = data.renderData;
       function generateCanvasElementConfig(canvasData, specs) {
@@ -1826,14 +1842,8 @@
   // components/inputs/index.ts
   var myInputs = {
     tagName: "my-inputs",
+    cssName: "inputs",
     createNode(shadowRoot, data, params) {
-      createElement({
-        tagName: "link",
-        attributes: {
-          rel: "stylesheet",
-          href: "./dist/inputs.css"
-        }
-      }, shadowRoot);
       const wrapperNode = createElement({
         tagName: "div",
         className: "wrapper",
@@ -2025,17 +2035,11 @@
   // components/materialItem/index.ts
   var myMaterialItem = {
     tagName: "my-material-item",
+    cssName: "materialItem",
     createNode(shadowRoot, data, params) {
       while (shadowRoot.firstChild) {
         shadowRoot.removeChild(shadowRoot.firstChild);
       }
-      createElement({
-        tagName: "link",
-        attributes: {
-          rel: "stylesheet",
-          href: "./dist/materialItem.css"
-        }
-      }, shadowRoot);
       let wrapperNode;
       function render() {
         if (wrapperNode) {

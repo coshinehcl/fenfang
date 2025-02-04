@@ -419,6 +419,7 @@ export const viewData:ActionHandler = async (parentNode,params) => {
                 const value = Number((ele as HTMLSelectElement).value)
                 const newChartList =getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList),value);
                 renderBody(newChartList);
+                params.pageNavManager.updatePageNav();
             }
             createElement({
                 tagName:'div',

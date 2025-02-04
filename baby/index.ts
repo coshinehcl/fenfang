@@ -38,9 +38,18 @@ function updateItems(){
     dateRanges.forEach(item => {
         if(item.type === 'week') {
             const currentWeekKeyDates = keyDateList.filter(_item => _item.belongWeek === item.date);
+            const hasImg = item.index >= 1 && item.index <= 40 ? true : false
             createElement({
                 tagName:'div',
                 className:'item-wrapper',
+                events:{
+                    click(event,currentNode){
+                        const img = currentNode.querySelector('img');
+                        if(img && img.dataset.src && !img.src) {
+                            img.src = img.dataset.src;
+                        }
+                    }
+                },
                 childs:[
                     {
                         tagName:'div',
@@ -48,7 +57,7 @@ function updateItems(){
                         childs:[
                             {
                                 tagName:'div',
-                                innerHTML:`<span style="color:#FF3366;">第${item.index}周</span>`
+                                innerHTML:`<span style="color:#FF3366;">第${item.index}周</span>${hasImg ? '<span style="font-size:12px;color:#999;">(点击查看图片)</span>' : ''}`
                             },
                             {
                                 tagName:'div',
@@ -63,13 +72,13 @@ function updateItems(){
                         tagName:'img',
                         className:'item-img',
                         style:{
-                            display:item.index >= 1 && item.index <= 40 ? 'block' : 'none'
+                            display:hasImg ? 'block' : 'none'
                         },
                         attributes:{
                             'data-src':`./images/${item.index}.png`,
                         },
                         returnNode(ele) {
-                            imageLazy(ele);
+                            // imageLazy(ele);
                         },
                     },
                     {

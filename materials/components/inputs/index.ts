@@ -3,14 +3,8 @@ import { ComponentsExport } from '@types'
 import { createElement,getRecordMaterialItemTotalInfo,getRecordBrandItemTotalInfo } from '@utils'
 export const myInputs:ComponentsExport<'my-inputs'> = {
     tagName:'my-inputs',
+    cssName:'inputs',
     createNode(shadowRoot,data,params){
-        createElement({
-            tagName:'link',
-            attributes:{
-                rel:"stylesheet",
-                href:"./dist/inputs.css"
-            }
-        },shadowRoot);
         const wrapperNode = createElement({
             tagName:'div',
             className:'wrapper',

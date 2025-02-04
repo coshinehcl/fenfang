@@ -86,7 +86,9 @@
         });
       } else if (key === "events") {
         Object.keys(value).forEach((eventName) => {
-          node.addEventListener(eventName, value[eventName]);
+          node.addEventListener(eventName, (event) => {
+            value[eventName](event, node);
+          });
         });
       }
     });
@@ -225,9 +227,18 @@
     dateRanges.forEach((item) => {
       if (item.type === "week") {
         const currentWeekKeyDates = keyDateList.filter((_item) => _item.belongWeek === item.date);
+        const hasImg = item.index >= 1 && item.index <= 40 ? true : false;
         createElement({
           tagName: "div",
           className: "item-wrapper",
+          events: {
+            click(event, currentNode) {
+              const img = currentNode.querySelector("img");
+              if (img && img.dataset.src && !img.src) {
+                img.src = img.dataset.src;
+              }
+            }
+          },
           childs: [
             {
               tagName: "div",
@@ -235,7 +246,7 @@
               childs: [
                 {
                   tagName: "div",
-                  innerHTML: `<span style="color:#FF3366;">\u7B2C${item.index}\u5468</span>`
+                  innerHTML: `<span style="color:#FF3366;">\u7B2C${item.index}\u5468</span>${hasImg ? '<span style="font-size:12px;color:#999;">(\u70B9\u51FB\u67E5\u770B\u56FE\u7247)</span>' : ""}`
                 },
                 {
                   tagName: "div",
@@ -250,13 +261,12 @@
               tagName: "img",
               className: "item-img",
               style: {
-                display: item.index >= 1 && item.index <= 40 ? "block" : "none"
+                display: hasImg ? "block" : "none"
               },
               attributes: {
                 "data-src": `./images/${item.index}.png`
               },
               returnNode(ele) {
-                imageLazy(ele);
               }
             },
             {

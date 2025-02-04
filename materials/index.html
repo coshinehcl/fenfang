@@ -76,6 +76,24 @@
             margin: 2px 0;
             font-size: 14px;
         }
+        .action-content {
+           margin-bottom: var(--pageNavMaxHeight);
+        }
+        .goHome {
+            display: block;
+            position: fixed;
+            left: 20px;
+            bottom:20px;
+            font-size: 12px;
+            height: 30px;
+            width: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 100%;
+            border:1px solid #999;
+            text-decoration: none;
+        }
     </style>
     <style>
         .form-content-wrapper .form-date-wrapper {
@@ -135,9 +153,6 @@
         }
     </style>
     <style>
-        .chart-wrapper {
-            padding-bottom: var(--pageNavMaxHeight);
-        }
         .chart-select-wrapper,.purchase-day-select {
             margin:var(--margin);
             padding:var(--padding);
@@ -200,6 +215,7 @@
         <div class="action-item" data-type="viewData">查看</div>
         <div class="action-item" data-type="inOutData">导入导出</div>
     </div>
+    <a class="goHome" href="../home.html">首页</a>
     <div class="action-content"></div>
     <div class="page-nav">
     </div>

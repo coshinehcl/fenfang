@@ -1,5 +1,5 @@
 type TransformToFunction<T> = {
-    [K in keyof T]: (e: T[K]) => void;
+    [K in keyof T]: (e: T[K],currentNode:HTMLElement) => void;
   };
   export interface CreateElementConfig<T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap> {
       /** 元素标签 */

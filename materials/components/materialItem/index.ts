@@ -2,17 +2,11 @@ import { ComponentsExport,BrandItem,GetArrayType } from '@types'
 import { createElement } from '@utils'
 export const myMaterialItem:ComponentsExport<'my-material-item'> = {
     tagName:'my-material-item',
+    cssName:'materialItem',
     createNode(shadowRoot,data,params){
         while(shadowRoot.firstChild) {
             shadowRoot.removeChild(shadowRoot.firstChild);
         }
-        createElement({
-            tagName:'link',
-            attributes:{
-                rel:"stylesheet",
-                href:"./dist/materialItem.css"
-            }
-        },shadowRoot);
         let wrapperNode:Element;
         function render(){
             if(wrapperNode) {

@@ -22,7 +22,9 @@ export function createElement<T extends keyof HTMLElementTagNameMap>(config:Crea
             })
         } else if(key === 'events'){
             Object.keys(value).forEach(eventName => {
-                node.addEventListener(eventName,value[eventName]);
+                node.addEventListener(eventName,(event:Event)=> {
+                    value[eventName](event,node)
+                });
             })
         }
     })

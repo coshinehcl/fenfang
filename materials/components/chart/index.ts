@@ -3,14 +3,8 @@ import { ComponentsExport, CreateElementConfig,ChartItemRenderDataItemLike,Brand
 import { createElement } from '@utils'
 export const myCharts:ComponentsExport<'my-charts'> = {
     tagName:'my-charts',
+    cssName:'chart',
     createNode(shadowRoot,data,params){
-        createElement({
-            tagName:'link',
-            attributes:{
-                rel:"stylesheet",
-                href:"./dist/chart.css"
-            }
-        },shadowRoot);
         const childsCanvasList:Array<CreateElementConfig> = [];
         const renderData = data.renderData;
         function generateCanvasElementConfig(canvasData:Array<ChartItemRenderDataItemLike>,specs?:BrandItem['specs']) {
