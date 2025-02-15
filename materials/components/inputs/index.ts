@@ -172,7 +172,10 @@ export const myInputs:ComponentsExport<'my-inputs'> = {
             if(!_wrapperNode) return;
             const itemTotalNodes = _wrapperNode.querySelectorAll('.item-total-placeholder') as NodeListOf<HTMLElement>;
             const listTotalNode = _wrapperNode.querySelector('.list-total-placeholder') as HTMLElement;
-            const totalText:Array<{total:number,totalText:string}> = getRecordMaterialItemTotalInfo(data)
+            let totalText:Array<{total:number,totalText:string}> = getRecordMaterialItemTotalInfo(data);
+            totalText = totalText.filter((item,index) => {
+               return !data.list[index].isDeprecated
+            })
             if(itemTotalNodes) {
                 Array.from(itemTotalNodes).forEach((itemTotalNode,index) => {
                     itemTotalNode.innerHTML = `${totalText[index].totalText} = <strong>${totalText[index].total}</strong>&nbsp${data.unit}`

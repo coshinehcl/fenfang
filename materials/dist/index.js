@@ -24,7 +24,8 @@
       year,
       month,
       day,
-      full: `${year}-${month}-${day}`
+      full: `${year}-${month}-${day}`,
+      fullStr: `${year}${month}${day}`
     };
   };
   var getDayDistance = (date1, date2) => {
@@ -678,7 +679,6 @@
         return 1;
       }
     });
-    console.log("recordList", recordList);
     return recordList;
   }
   var getRecordList = () => {
@@ -702,7 +702,10 @@
     try {
       localStorage.setItem(RecordListStorageKey, JSON.stringify(recordList));
     } catch (err) {
+      alert("\u5185\u5B58\u4E0D\u8DB3\uFF0C\u5C06\u4F1A\u79FB\u9664\u90E8\u5206\u8001\u6570\u636E");
       sortRecordList(recordList);
+      recordList = recordList.slice(1);
+      setRecordList(recordList);
     }
   };
   var removeRecordList = () => {
@@ -1587,7 +1590,7 @@
       const blob = new Blob([jsonString], { type: "application/json" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `\u4ED3\u5E93\u7269\u6599\u6570\u636E(${getCurrentDate().full})`;
+      link.download = `\u4ED3\u5E93${getCurrentDate().fullStr}`;
       link.click();
       URL.revokeObjectURL(link.href);
     }
@@ -2027,7 +2030,10 @@
         if (!_wrapperNode) return;
         const itemTotalNodes = _wrapperNode.querySelectorAll(".item-total-placeholder");
         const listTotalNode = _wrapperNode.querySelector(".list-total-placeholder");
-        const totalText = getRecordMaterialItemTotalInfo(data);
+        let totalText = getRecordMaterialItemTotalInfo(data);
+        totalText = totalText.filter((item, index) => {
+          return !data.list[index].isDeprecated;
+        });
         if (itemTotalNodes) {
           Array.from(itemTotalNodes).forEach((itemTotalNode, index) => {
             itemTotalNode.innerHTML = `${totalText[index].totalText} = <strong>${totalText[index].total}</strong>&nbsp${data.unit}`;
