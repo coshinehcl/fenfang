@@ -210,7 +210,7 @@ function getChartItemRenderDataComputedList(list:Array<ChartItemBasicAndRenderBa
                         return `(<strong>${lastFormatItem.value}${lastFormatItem.unit}<strong>)`
                     }
                     if(index ===  chartBasicItem.renderData.materialItem.length -1) {
-                        const dayDistance = getDayDistance(getCurrentDate().full,lastItem.recordDate);
+                        const dayDistance = getDayDistance(getCurrentDate().full,lastPushItem.recordDate);
                         const currentRepoNum = getFormatNum(lastPushItem.repo - lastPushItem.averageDayUse * dayDistance)
                         if(availableDay - dayDistance >= needSufficeDay) {
                             lastPushItem.purchaseSuggestText = `到目前为止,仓库${currentRepoNum}均日耗${lastPushItem.averageDayUse},可用${getFormatNum(availableDay - dayDistance)}天,无需购买`
@@ -418,7 +418,12 @@ export const viewData:ActionHandler = async (parentNode,params) => {
             function getSelectValueAndRender(ele:Element){
                 const value = Number((ele as HTMLSelectElement).value)
                 const newChartList =getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList),value);
-                renderBody(newChartList);
+                if(value < 30) {
+                    // 小于30天的，只过滤出来，需要购买的。方便查看
+                    renderBody(newChartList.filter(item => item.renderData.brandList.some(_item => _item[_item.length -1].purchaseSuggest > 0)));
+                } else {
+                    renderBody(newChartList);
+                }
                 params.pageNavManager.updatePageNav();
             }
             createElement({
@@ -441,7 +446,7 @@ export const viewData:ActionHandler = async (parentNode,params) => {
                                 getSelectValueAndRender(e.target as Element)
                             }
                         },
-                        childs:[30,40,45,50,55,60,65,70].map(i => ({
+                        childs:[5,10,15,20,25,30,40,45,50,55,60,65,70].map(i => ({
                             tagName:'option',
                             attributes:{
                                 value:i

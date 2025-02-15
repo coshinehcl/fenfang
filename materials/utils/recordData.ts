@@ -5,6 +5,20 @@ import { recordItemBelongs } from '@config/recordList'
 import { getNewMaterialsList } from '@config/materialsList'
 const RecordListStorageKey = 'materials_recordList'
 const materialsList = getNewMaterialsList();
+function sortRecordList(recordList:Array<RecordItem>):Array<RecordItem>{
+    recordList.sort((l,r) => {
+        const l_recordDateNumber = Number(l.recordDate.split('-').join(''));
+        const r_recordDateNumber = Number(r.recordDate.split('-').join(''));
+        if(l_recordDateNumber < r_recordDateNumber) {
+            return -1;
+        } else if(l_recordDateNumber === r_recordDateNumber) {
+            return 0;
+        } else {
+            return 1;
+        }
+    })
+    return recordList;
+}
 /** 获取记录数据列表 */
 export const getRecordList = () => {
     const recordList = localStorage.getItem(RecordListStorageKey);
@@ -13,18 +27,7 @@ export const getRecordList = () => {
             const _list = JSON.parse(recordList) as Array<RecordItem>;
             // 取出来的时候，排序好
             if(Array.isArray(_list)) {
-                _list.sort((l,r) => {
-                    const l_recordDateNumber = Number(l.recordDate.split('-').join(''));
-                    const r_recordDateNumber = Number(r.recordDate.split('-').join(''));
-                    if(l_recordDateNumber < r_recordDateNumber) {
-                        return -1;
-                    } else if(l_recordDateNumber === r_recordDateNumber) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                })
-                return _list;
+                return sortRecordList(_list);
             } else {
                 return [];
             }
@@ -38,7 +41,16 @@ export const getRecordList = () => {
 }
 /** 设置记录数据进来 */
 export const setRecordList = (recordList:Array<RecordItem>) => {
-    localStorage.setItem(RecordListStorageKey,JSON.stringify(recordList));
+    try {
+        localStorage.setItem(RecordListStorageKey,JSON.stringify(recordList));
+    } catch(err) {
+        alert('内存不足，将会移除部分老数据')
+        sortRecordList(recordList);
+        recordList = recordList.slice(1);
+        // 再次存储
+        setRecordList(recordList);
+    }
+    
 }
 export const removeRecordList = () => {
     localStorage.removeItem(RecordListStorageKey)

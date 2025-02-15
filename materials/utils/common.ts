@@ -24,7 +24,8 @@ export const getCurrentDate = ()=> {
         year,
         month,
         day,
-        full:`${year}-${month}-${day}` as DateFull
+        full:`${year}-${month}-${day}` as DateFull,
+        fullStr:`${year}${month}${day}`
     }
 }
 /** 获取两个日期先差多少天 */

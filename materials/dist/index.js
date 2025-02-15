@@ -666,24 +666,28 @@
   // utils/recordData.ts
   var RecordListStorageKey = "materials_recordList";
   var materialsList2 = getNewMaterialsList();
+  function sortRecordList(recordList) {
+    recordList.sort((l, r) => {
+      const l_recordDateNumber = Number(l.recordDate.split("-").join(""));
+      const r_recordDateNumber = Number(r.recordDate.split("-").join(""));
+      if (l_recordDateNumber < r_recordDateNumber) {
+        return -1;
+      } else if (l_recordDateNumber === r_recordDateNumber) {
+        return 0;
+      } else {
+        return 1;
+      }
+    });
+    console.log("recordList", recordList);
+    return recordList;
+  }
   var getRecordList = () => {
     const recordList = localStorage.getItem(RecordListStorageKey);
     if (recordList) {
       try {
         const _list = JSON.parse(recordList);
         if (Array.isArray(_list)) {
-          _list.sort((l, r) => {
-            const l_recordDateNumber = Number(l.recordDate.split("-").join(""));
-            const r_recordDateNumber = Number(r.recordDate.split("-").join(""));
-            if (l_recordDateNumber < r_recordDateNumber) {
-              return -1;
-            } else if (l_recordDateNumber === r_recordDateNumber) {
-              return 0;
-            } else {
-              return 1;
-            }
-          });
-          return _list;
+          return sortRecordList(_list);
         } else {
           return [];
         }
@@ -695,7 +699,11 @@
     }
   };
   var setRecordList = (recordList) => {
-    localStorage.setItem(RecordListStorageKey, JSON.stringify(recordList));
+    try {
+      localStorage.setItem(RecordListStorageKey, JSON.stringify(recordList));
+    } catch (err) {
+      sortRecordList(recordList);
+    }
   };
   var removeRecordList = () => {
     localStorage.removeItem(RecordListStorageKey);
@@ -1293,7 +1301,7 @@
             lastPushItem.availableDay = getFormatNum(lastPushItem.repo / lastPushItem.averageDayUse);
             let availableDay = lastPushItem.availableDay;
             if (index === chartBasicItem.renderData.materialItem.length - 1) {
-              const dayDistance2 = getDayDistance(getCurrentDate().full, lastItem.recordDate);
+              const dayDistance2 = getDayDistance(getCurrentDate().full, lastPushItem.recordDate);
               const currentRepoNum = getFormatNum(lastPushItem.repo - lastPushItem.averageDayUse * dayDistance2);
               if (availableDay - dayDistance2 >= needSufficeDay) {
                 lastPushItem.purchaseSuggestText = `\u5230\u76EE\u524D\u4E3A\u6B62,\u4ED3\u5E93${currentRepoNum}\u5747\u65E5\u8017${lastPushItem.averageDayUse},\u53EF\u7528${getFormatNum(availableDay - dayDistance2)}\u5929,\u65E0\u9700\u8D2D\u4E70`;
@@ -1489,7 +1497,11 @@
         let getSelectValueAndRender2 = function(ele) {
           const value = Number(ele.value);
           const newChartList = getChartItemRenderDataComputedList(cloneData(chartItemBasicRenderDataList), value);
-          renderBody(newChartList);
+          if (value < 30) {
+            renderBody(newChartList.filter((item) => item.renderData.brandList.some((_item) => _item[_item.length - 1].purchaseSuggest > 0)));
+          } else {
+            renderBody(newChartList);
+          }
           params.pageNavManager.updatePageNav();
         };
         var getSelectValueAndRender = getSelectValueAndRender2;
@@ -1513,7 +1525,7 @@
                   getSelectValueAndRender2(e.target);
                 }
               },
-              childs: [30, 40, 45, 50, 55, 60, 65, 70].map((i) => ({
+              childs: [5, 10, 15, 20, 25, 30, 40, 45, 50, 55, 60, 65, 70].map((i) => ({
                 tagName: "option",
                 attributes: {
                   value: i

@@ -15,7 +15,7 @@ export const inOutData:ActionHandler = (parentNode,params) => {
         // 设置链接的href为Blob对象的URL
         link.href = URL.createObjectURL(blob);
         // 设置下载的文件名
-        link.download = `仓库物料数据(${getCurrentDate().full})`;
+        link.download = `仓库${getCurrentDate().fullStr}`;
         // 触发点击事件以下载文件
         link.click();
         // 释放Blob URL
