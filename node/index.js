@@ -37,8 +37,8 @@ const server = https.createServer(options,(req, res) => {
                 res.end(content);
             }
         });
-    } else if(urlPath ==='/home.html') {
-        const filePath = path.join(__dirname, `.${urlPath}`);
+    } else if(urlPath ==='/home.html' || urlPath ==='/main.html') {
+        const filePath = path.join(__dirname, `../${urlPath}`);
         fs.readFile(filePath, (err, content) => {
             if (err) {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
