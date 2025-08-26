@@ -30,7 +30,8 @@ const server = https.createServer(options,(req, res) => {
                     '.js':'text/javascript',
                     '.css':'text/css',
                     '.json':'application/json',
-                    '.html':'text/html'
+                    '.html':'text/html',
+                    '.png': 'image/png'
                 }
                 res.writeHead(200, {'Content-Type': contentTypeMap[path.extname(filePath)]});
                 res.end(content);
