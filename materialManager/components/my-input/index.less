@@ -1,0 +1,39 @@
+@import (reference) '../../main/variables.less';
+:host {
+    flex:1;
+    display: inline-block;
+}
+.wrapper {
+    &:has(.unit) {
+        input {
+            padding-right: 0;;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+    .input-common();
+    margin:0 0;
+    display: flex;
+    padding-left: 0;
+    padding-right: 0px;
+    justify-content: center;
+    align-items: center;
+    input {
+        flex:1;
+        width: 10px;
+        height: 100%;
+        padding: 0 10px;
+        outline: none;
+        border: none;
+        border-radius: @borderRadiusBtn;
+        box-sizing: border-box;
+        font-size: @fontSizeNormal;
+    }
+    .unit {
+        flex:none;
+        font-size: @fontSizeSmall;
+        color:@colorInfo;
+        line-height: 1;
+        margin:0 8px;
+    }
+}

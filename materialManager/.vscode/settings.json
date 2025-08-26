@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "**/node_modules": true,
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "package.json": "pnpm-lock.yaml, tsconfig.json"
+    },
+    "liveServer.settings.port": 5501
+}

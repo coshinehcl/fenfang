@@ -1,0 +1,19 @@
+{
+  "name": "materialManager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "node ./script/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.25.1",
+    "esbuild-plugin-less": "^1.3.18",
+    "typedoc": "^0.28.2",
+    "typescript": "^5.8.2"
+  }
+}

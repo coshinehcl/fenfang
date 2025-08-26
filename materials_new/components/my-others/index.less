@@ -1,0 +1,31 @@
+.wrapper {
+    .block-wrapper {
+        margin: var(--margin);
+        margin-top:0;
+        padding: var(--padding);
+        border: var(--border);
+        border-radius: var(--borderRadius);
+        .block-title {
+            text-align: center;
+            color:#315efb;
+        }
+        .block-body {
+            &:has(*) {
+                padding: var(--padding);
+                border: var(--border);
+                border-radius: var(--borderRadius);
+            }
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            & > * {
+                margin: 10px 0;
+                padding: var(--padding) 10px;
+                border-radius: 100px;
+                border: var(--border);
+            }
+        }
+    }
+}

@@ -1,14 +1,20 @@
-const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-// 创建服务器
-const server = http.createServer((req, res) => {
+// 加载证书和私钥文件
+const options = {
+    key: fs.readFileSync(path.join(__dirname,'./coshinehcl.com.key')), // 替换为您的私钥文件路径
+    cert: fs.readFileSync(path.join(__dirname,'./coshinehcl.com.pem')) // 替换为您的证书文件路径
+};
+
+// 创建服务器 http请求不合适
+const server = https.createServer(options,(req, res) => {
     // 解析URL路径
     let urlPath = req.url;
     console.log(urlPath)
     // 检查是否为 '/test' 请求
-    if (urlPath.startsWith('/materials')) {
+    if (['/materials','/materialManager','/baby'].some(i => urlPath.startsWith(i))) {
         // 构建目标HTML文件的绝对路径
         const filePath = path.join(__dirname, `../${urlPath}`);
         
@@ -37,7 +43,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-// 监听3000端口
-server.listen(443, () => {
+// 监听443
+server.listen(443,'0.0.0.0', () => {
     console.log('Server is running on port 443');
 });

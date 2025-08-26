@@ -1,0 +1,102 @@
+.wrapper {
+    margin: var(--margin);
+    padding: var(--padding);
+    border:var(--border);
+    border-radius: var(--borderRadius);
+    font-size: var(--fontSize);
+    --infoColor:rgba(153, 153, 153,.6);
+    --infoHelpColor:rgba(153, 153, 153,.3);
+    .material-label-wrapper {
+        position: relative;
+        text-align: center;
+        .material-belong {
+            position: absolute;
+            top:50%;
+            right:0;
+            color:var(--infoHelpColor);
+            transform: translate(0,-50%);
+            font-size: 12px;
+        }
+    }
+    .brand-list {
+        .brand-item {
+            margin: var(--margin);
+            padding: var(--padding);
+            border:var(--border);
+            border-color: var(--infoColor);
+            border-radius: var(--borderRadius);
+            .brand-label-wrapper {
+                position: relative;
+                .brand-label {
+                    font-weight: bold;
+                }
+                .brand-specs {
+                    position: absolute;
+                    top:50%;
+                    right:0;
+                    color:var(--infoHelpColor);
+                    transform: translate(0,-50%);
+                    font-size: 12px;
+                }
+            }
+            .brand-inputs-wrapper {
+                margin-top: var(--margin);
+                display: flex;
+                align-items: center;
+               .input-wrapper {
+                    box-sizing: border-box;
+                    width: 33.3%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    border:var(--border);
+                    border-color: var(--infoColor);
+                    border-radius: 100px;
+                    height: 30px;
+                    overflow: hidden;
+                    .input-unit {
+                        width:22px;
+                        font-size: 12px;
+                        color:var(--infoColor);
+                        display: inline-block;
+                    }
+                    input {
+                        width:calc(100% - 22px);
+                        padding-left: 10px;
+                        font-size: 14px;
+                        border:none;
+                        outline: none;
+                        height: 26px;
+                    }
+               }
+
+            }
+            .brand-help {
+                margin-top: var(--margin);
+                font-size: 12px;
+                color:var(--infoColor);
+                .brand-help-item {
+                    display: flex;
+                    .brand-help-item-content {
+                        flex:1;
+                        display: flex;
+                    }
+                }
+            }
+        }
+    }
+    .material-help {
+        margin-top: var(--margin);
+        // 和brandItem的保持对齐
+        padding:0 calc(var(--padding) + var(--margin) + 1px);
+        font-size: 12px;
+        color:var(--infoColor);
+        .material-help-item {
+            display: flex;
+            .material-help-item-content {
+                flex:1;
+                display: flex;
+            }
+        }
+    }
+}

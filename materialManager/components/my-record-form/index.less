@@ -1,0 +1,42 @@
+@import (reference) '../../main/variables.less';
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    .form-head-wrapper {
+        flex:0;
+        text-align: center;
+        .block-common-margin();
+        .form-date {
+            .input-common();
+            width: 33.3vw;
+        }
+    }
+    .form-body-wrapper {
+        flex:1;
+        overflow-y: scroll;
+        .belong-wrapper {
+            .block-common-margin();
+            .belong-label {
+                text-align: center;
+            }
+            .belong-content-wrapper {
+                // .block-common-margin();
+            }
+        }
+    }
+    .form-footer-wrapper {
+        flex:0;
+        &:has(.btn-item) {
+            .block-common-margin();
+        }
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .btn-item {
+            .btn-common();
+            padding:0 @paddingBtn;
+            width: 33.3vw;
+        }
+    }
+}

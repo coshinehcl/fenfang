@@ -63,7 +63,7 @@ export const myMaterialItem:ComponentsExport<'my-material-item'> = {
                     {
                         tagName:'div',
                         className:'material-brands-wrapper',
-                        childs:data.list.map((brandItem,brandIndex) => {
+                        childs:data.list.map((brandItem) => {
                             return {
                                 tagName:'div',
                                 className:'brand-item',

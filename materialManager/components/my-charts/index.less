@@ -1,0 +1,37 @@
+@import (reference) '../../main/variables.less';
+.wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .head-wrapper {
+        flex:0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        .block-common-margin();
+        .chart-type-select,.chart-label-select {
+            .input-common();
+            width: 33.3vw;
+        }
+    }
+    .body-wrapper {
+        flex:1;
+        overflow-y: scroll;
+        .material-wrapper {
+            .block-common-margin();
+        }
+    }
+    .footer {
+        font-size: @fontSizeSmall;
+        color:@colorInfo;
+        .date {
+            color:@colorMain;
+        }
+        strong {
+            display: inline-block;
+            padding:0 4px;
+            color:@colorError;
+            font-size: @fontSizeNormal;
+        }
+    }
+}

@@ -1,0 +1,26 @@
+@import (reference) '../../main/variables.less';
+.wrapper {
+    display: flex;
+    border:@border;
+    margin:@marginBlock;
+    padding: @paddingBlock;
+    border-radius: @borderRadiusBlock;
+    justify-content: space-between;
+    .head-item {
+        .btn-common();
+        flex-grow: 1;
+        &.active {
+            border-color: @colorActive;
+            color:@colorActive;
+        }
+    }
+    .extra-btn-wrapper:empty {
+        flex-grow: 0;
+    }
+    .extra-btn-wrapper {
+        flex-grow:1;
+        & > div {
+            .btn-common();
+        }
+    }
+}

@@ -1,0 +1,88 @@
+// font-size
+@fontSizeBig:16px;
+@fontSizeNormal:14px;
+@fontSizeSmall:12px;
+
+// margin
+@marginBlock:4px;
+@paddingBlock:4px;
+// margin-gap
+@marginGapRow:4px;
+@marginGapColumn:10px;
+
+// border-radius
+@borderRadiusBlock:4px;
+@borderRadiusBtn:100px;
+@borderRadiusInput:100px;
+
+// padding
+@paddingBlock:4px;
+@paddingBtn:10px;
+
+// border
+@border:1px solid #999;
+
+// height
+@heightBtn:30px;
+@heightInput:30px;
+
+// box-shadow
+@boxShadow:0px -2px 12px 0 rgba(0, 0, 0, 0.3);
+
+// color
+@colorMain:#333;
+@colorActive:#409eff;
+@colorSuccess:rgb(103, 194, 58);
+@colorError:rgb(245, 108, 108);
+@colorWarn:rgb(230, 162, 60);
+@colorInfo:rgb(144, 147, 153);
+
+// bg-color
+@bgColorSuccess:rgb(240, 249, 235);
+@bgColorError:rgb(254, 240, 240);
+@bgColorWarn:rgb(253, 246, 236);
+@bgColorInfo:rgb(244, 244, 245);
+
+.color-block(@_type) {
+    @currentColor: ~"color@{_type}";
+    @currentBgColor: ~"bgColor@{_type}";
+    color:@@currentColor;
+    border:@border;
+    border-color: currentColor;
+    background-color: @@currentBgColor;
+}
+
+
+// btn
+.btn-common {
+    height: @heightBtn;
+    font-size: @fontSizeNormal;
+    border:@border;
+    box-sizing: border-box;
+    border-radius: @borderRadiusBtn;
+    margin:0 @marginGapRow;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.block-common {
+    font-size: @fontSizeNormal;
+    border:@border;
+    box-sizing: border-box;
+    border-radius:@borderRadiusBlock;
+    padding: @paddingBlock;
+}
+.block-common-margin {
+    .block-common();
+    margin:@marginBlock;
+}
+.input-common {
+    height: @heightBtn;
+    font-size: @fontSizeNormal;
+    border:@border;
+    box-sizing: border-box;
+    border-radius: @borderRadiusBtn;
+    margin:0 @marginGapRow;
+    outline: none;
+    padding:0 10px;
+}

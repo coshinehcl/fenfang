@@ -28,7 +28,8 @@ export const myCharts:ComponentsExport<'my-charts'> = {
                     },
                     options: {
                         responsive: true, // 确保图表响应式
-                        maintainAspectRatio: false, // 
+                        maintainAspectRatio: false, //
+                       
                         plugins:{
                             legend: {
                                 position: 'top', // 将 legend 放置在顶部
@@ -44,15 +45,19 @@ export const myCharts:ComponentsExport<'my-charts'> = {
                                 },
                             },
                             datalabels: {
+                                clamp: true,
+                                verflow: false,
+                                align:'start',
+                                offset:function(context:any){ // align不能为center。否则此属性不生效
+                                    console.log(context)
+                                    return 50;
+                                },
                                 color: '#333', // 文字颜色，白色
                                 backgroundColor: function(context:any) {
                                     return context.dataset.backgroundColor; // 使用数据集的颜色作为背景色
                                 },
-                                clamp: true,
-                                offset:function(context:any){
-                                    // console.log(context)
-                                    return 50;
-                                },
+                               
+                                
                                 rotation: function(context:any) {
                                     const datasetIndex = context.datasetIndex
                                     if(datasetIndex === 0) {

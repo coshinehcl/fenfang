@@ -1,0 +1,112 @@
+@import (reference) '../../main/variables.less';
+.wrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .edit-icon {
+        padding: 0 10px;
+    }
+    .content {
+        flex:1;
+        overflow-y: scroll;
+        .material-item-wrapper {
+            &:focus-within {
+                border-color: @colorActive;
+                .material-label-wrapper {
+                    color:@colorActive;
+                }
+            }
+            .block-common();
+            &.active {
+                border-color: @colorActive;
+                .material-label-wrapper {
+                    color:@colorActive;
+                }
+            }
+            &.new-material-item {
+                border-color: @colorSuccess;
+            }
+            &.material-item-deprecated {
+                color:@colorInfo;
+                select {
+                    color:@colorInfo;
+                }
+            }
+            margin:@marginBlock;
+            .material-label-wrapper {
+                display: flex;
+            }
+            .material-item-content {
+                opacity: 0;
+                height: 0;
+                overflow: hidden;
+                transition: opacity .6s,height .3s;
+                will-change: auto;
+                &.active {
+                    // 需要js设置height:scrollHeight
+                    opacity:1;
+                }
+                .brand-list-wrapper {
+                    .brand-item-wrapper {
+                        &.new-brand-item {
+                            border-color: @colorSuccess;
+                        }
+                        &.brand-item-deprecated {
+                            color:@colorInfo;
+                            select {
+                                color:@colorInfo;
+                            }
+                        }
+                        margin-top:@marginGapColumn;
+                        &:nth-of-type(n+2) {
+                            margin-top:calc(@marginGapColumn / 2)
+                        }
+                        .block-common();
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        .brand-label-wrapper {
+                            display: flex;
+                        }
+                        .brand-specs-text {
+                            margin-left: auto;
+                        }
+                        select {
+                            .input-common();
+                        }
+                    }
+                }
+                .material-item-form {
+                    margin-top: @marginGapColumn;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    .material-usage-wrapper {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        flex:1;
+                    }
+                    .add-brand-item {
+                        flex:none;
+                        .btn-common();
+                        padding:0 @paddingBtn;
+                        margin-right: 0;
+                    }
+                }
+            }
+        }
+    }
+    .footer {
+        flex:0;
+        background: #fff;
+        .block-common();
+        margin: 0 @marginBlock;
+        box-shadow: @boxShadow;
+        display: flex;
+        .footer-item {
+            .btn-common();
+            flex:1;
+        }
+    }
+}

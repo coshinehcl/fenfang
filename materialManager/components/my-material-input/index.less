@@ -1,0 +1,105 @@
+@import (reference) '../../main/variables.less';
+.host-active {
+    .wrapper {
+        border-color: @colorActive;
+        box-shadow: @boxShadow;
+        .material-item-label-wrapper {
+            .material-item-label {
+                color:@colorActive;
+            }
+        }
+    }
+}
+:host {
+    background-color: red;
+}
+:host(.active) {
+   .host-active();
+}
+:host(:focus-within) {
+    .host-active(); 
+}
+.wrapper {
+    .block-common();
+    border-color: #99999933;
+    margin: @marginBlock 0;
+    .material-item-label-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .material-item-label {
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 30px;
+        }
+        .material-item-belong {
+            font-size: @fontSizeSmall;
+            color:@colorInfo;
+        }
+    }
+    .brand-list-wrapper {
+        .brand-item-wrapper {
+            .block-common();
+            border-color: #99999933;
+            margin: @marginBlock 0;
+            .brand-item-label-wrapper {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                .brand-item-label {
+                    font-weight: bold;
+                }
+                .brand-item-specs-text {
+                    font-size: @fontSizeSmall;
+                    color:@colorInfo;
+                }
+            }
+            .brand-item-input-wrapper {
+                margin-top: @marginGapColumn;
+                my-input {
+                    width: 33.3%;
+                }
+            }
+            .brand-item-input-help {
+                margin-top: @marginGapColumn;
+                font-size: @fontSizeSmall;
+                color:@colorInfo;
+                .help-item {
+                    display: flex;
+                    .help-item-value {
+                        word-break:break-all;
+                        &.current {
+                            color:@colorMain;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .material-help {
+        margin-top: @marginGapColumn;
+        font-size: @fontSizeSmall;
+        color:@colorInfo;
+        padding:0 calc(@paddingBlock + 1px);
+        .help-item {
+            display: flex;
+            .help-item-value {
+                word-break:break-all;
+                &.current {
+                    color:@colorMain;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+    .validator-wrapper {
+        border-top: 1px solid #99999933;
+        padding:@paddingBlock;
+        margin: @marginBlock 0;
+        font-size: @fontSizeSmall;
+        .title {
+            color:#9999FF;
+        }
+    }
+}
