@@ -14,7 +14,7 @@ const server = https.createServer(options,(req, res) => {
     let urlPath = req.url;
     console.log(urlPath)
     // 检查是否为 '/test' 请求
-    if (['/materials','/materialManager','/baby'].some(i => urlPath.startsWith(i))) {
+    if (['/materials','/materialManager','/baby','/materials_new'].some(i => urlPath.startsWith(i))) {
         // 构建目标HTML文件的绝对路径
         const filePath = path.join(__dirname, `../${urlPath}`);
         
